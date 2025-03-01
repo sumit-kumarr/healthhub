@@ -1,328 +1,354 @@
 
+import { useState } from "react";
 import { 
   Users, 
   MessageSquare, 
-  Trophy, 
-  Share2, 
   Heart, 
-  Clock, 
-  ThumbsUp 
+  Award, 
+  Calendar, 
+  Search,
+  Plus,
+  Share2,
+  ThumbsUp,
+  MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar } from "@/components/ui/avatar";
-import { SectionHeader } from "@/components/ui/section-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FeatureCard } from "@/components/ui/feature-card";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { SectionHeader } from "@/components/ui/section-header";
 
-const CommunityPost = ({ 
-  author, 
-  avatar, 
-  time, 
-  content, 
-  likes, 
-  comments, 
-  image 
-}: { 
-  author: string;
-  avatar: string;
-  time: string;
+interface PostProps {
+  user: {
+    name: string;
+    avatar: string;
+    badge?: string;
+  };
   content: string;
+  image?: string;
   likes: number;
   comments: number;
-  image?: string;
-}) => {
-  return (
-    <div className="border rounded-lg p-4 mb-4">
-      <div className="flex items-center mb-3">
-        <Avatar className="h-10 w-10 mr-3">
-          <img src={avatar} alt={author} className="rounded-full object-cover" />
-        </Avatar>
-        <div>
-          <h3 className="font-medium">{author}</h3>
-          <div className="flex items-center text-xs text-muted-foreground">
-            <Clock className="h-3 w-3 mr-1" />
-            <span>{time}</span>
-          </div>
+  time: string;
+}
+
+const Post = ({ user, content, image, likes, comments, time }: PostProps) => (
+  <Card className="p-4 space-y-4">
+    <div className="flex items-center gap-3">
+      <Avatar>
+        <AvatarImage src={user.avatar} />
+        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+      </Avatar>
+      <div>
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{user.name}</span>
+          {user.badge && (
+            <Badge variant="outline" className="text-xs font-normal">
+              {user.badge}
+            </Badge>
+          )}
         </div>
+        <div className="text-xs text-muted-foreground">{time}</div>
       </div>
-      
-      <p className="mb-3">{content}</p>
-      
+    </div>
+    
+    <div>
+      <p className="text-sm">{content}</p>
       {image && (
         <img 
           src={image} 
-          alt="Post attachment" 
-          className="rounded-lg mb-3 max-h-64 w-full object-cover" 
+          alt="Post" 
+          className="mt-3 rounded-lg w-full object-cover max-h-72" 
         />
       )}
-      
-      <div className="flex justify-between items-center pt-2 border-t">
-        <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
-          <ThumbsUp className="h-4 w-4" /> {likes}
-        </Button>
-        <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
-          <MessageSquare className="h-4 w-4" /> {comments}
-        </Button>
-        <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
-          <Share2 className="h-4 w-4" /> Share
-        </Button>
-      </div>
     </div>
-  );
-};
-
-const GroupCard = ({ 
-  name, 
-  description, 
-  members, 
-  image 
-}: { 
-  name: string;
-  description: string;
-  members: number;
-  image: string;
-}) => {
-  return (
-    <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-      <img 
-        src={image} 
-        alt={name} 
-        className="h-32 w-full object-cover" 
-      />
-      <div className="p-4">
-        <h3 className="font-medium mb-1">{name}</h3>
-        <p className="text-sm text-muted-foreground mb-3">{description}</p>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Users className="h-4 w-4 mr-1" />
-            <span>{members} members</span>
-          </div>
-          <Button size="sm">Join</Button>
-        </div>
-      </div>
+    
+    <div className="flex justify-between pt-2 border-t">
+      <Button variant="ghost" size="sm" className="gap-1">
+        <ThumbsUp className="h-4 w-4" />
+        <span>{likes}</span>
+      </Button>
+      <Button variant="ghost" size="sm" className="gap-1">
+        <MessageCircle className="h-4 w-4" />
+        <span>{comments}</span>
+      </Button>
+      <Button variant="ghost" size="sm">
+        <Share2 className="h-4 w-4" />
+      </Button>
     </div>
-  );
-};
+  </Card>
+);
 
-const ChallengeCard = ({ 
-  title, 
-  description, 
-  participants, 
-  daysLeft, 
-  image 
-}: { 
+interface EventProps {
   title: string;
-  description: string;
-  participants: number;
-  daysLeft: number;
+  date: string;
+  location: string;
+  attendees: number;
   image: string;
-}) => {
-  return (
-    <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-      <div className="relative">
-        <img 
-          src={image} 
-          alt={title} 
-          className="h-32 w-full object-cover" 
-        />
-        <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground px-2 py-1 text-xs font-medium">
-          {daysLeft} days left
-        </div>
+}
+
+const Event = ({ title, date, location, attendees, image }: EventProps) => (
+  <Card className="overflow-hidden">
+    <img 
+      src={image} 
+      alt={title} 
+      className="w-full h-40 object-cover" 
+    />
+    <div className="p-4">
+      <h3 className="font-medium mb-1">{title}</h3>
+      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+        <Calendar className="h-4 w-4" />
+        <span>{date}</span>
       </div>
-      <div className="p-4">
-        <h3 className="font-medium mb-1">{title}</h3>
-        <p className="text-sm text-muted-foreground mb-3">{description}</p>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Users className="h-4 w-4 mr-1" />
-            <span>{participants} participants</span>
-          </div>
-          <Button size="sm">Join Challenge</Button>
-        </div>
+      <p className="text-sm text-muted-foreground mb-4">{location}</p>
+      <div className="flex justify-between items-center">
+        <span className="text-xs text-muted-foreground">{attendees} attending</span>
+        <Button size="sm">Join</Button>
       </div>
     </div>
-  );
-};
+  </Card>
+);
 
 const CommunityPage = () => {
-  const communityFeatures = [
+  const posts: PostProps[] = [
     {
-      title: "Join Wellness Groups",
-      description: "Connect with people sharing similar health goals and challenges.",
-      icon: Users,
+      user: {
+        name: "Sarah Johnson",
+        avatar: "https://images.unsplash.com/photo-1557296387-5358ad7997bb?auto=format&fit=crop&w=150&q=80",
+        badge: "Fitness Coach"
+      },
+      content: "Just finished my morning run! 5K in 22 minutes - a new personal best. Who else is getting their cardio in today?",
+      image: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80",
+      likes: 34,
+      comments: 8,
+      time: "2 hours ago"
     },
     {
-      title: "Health Challenges",
-      description: "Participate in monthly challenges to develop healthy habits.",
-      icon: Trophy,
+      user: {
+        name: "Michael Chen",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+      },
+      content: "I've been following the Mediterranean diet for 3 weeks now and I'm feeling so much better. Anyone else tried it? Would love some recipe recommendations!",
+      likes: 22,
+      comments: 15,
+      time: "5 hours ago"
     },
     {
-      title: "Share Your Journey",
-      description: "Document and share your health progress with the community.",
-      icon: Share2,
-    },
-    {
-      title: "Get Expert Advice",
-      description: "Learn from certified health professionals and coaches.",
-      icon: MessageSquare,
-    },
+      user: {
+        name: "Emma Wilson",
+        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80",
+        badge: "Nutritionist"
+      },
+      content: "Three key habits for better sleep: 1) Consistent sleep schedule 2) No screens 1 hour before bed 3) Keep your bedroom cool. What works for you?",
+      likes: 56,
+      comments: 23,
+      time: "Yesterday"
+    }
   ];
 
-  const posts = [
+  const events: EventProps[] = [
     {
-      author: "Sarah Johnson",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=64&auto=format&fit=crop",
-      time: "2 hours ago",
-      content: "Just completed my first 5K run! It's been a long journey from barely being able to run for 5 minutes to finishing a full 5K. So grateful for all the support from this community!",
-      image: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=500&auto=format&fit=crop",
-      likes: 42,
-      comments: 8,
+      title: "Community 5K Run",
+      date: "Aug 15, 2023 • 8:00 AM",
+      location: "Central Park, New York",
+      attendees: 45,
+      image: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=800&q=80"
     },
     {
-      author: "Michael Chen",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=64&auto=format&fit=crop",
-      time: "Yesterday",
-      content: "Today I learned that walking 10,000 steps a day can significantly reduce the risk of heart disease. I've been tracking my steps for a month now and I'm averaging 8,500. Almost there!",
-      likes: 28,
-      comments: 5,
+      title: "Yoga in the Park",
+      date: "Aug 20, 2023 • 9:00 AM",
+      location: "Riverside Park, New York",
+      attendees: 32,
+      image: "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&w=800&q=80"
     },
     {
-      author: "Emily Rodriguez",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=64&auto=format&fit=crop",
-      time: "3 days ago",
-      content: "My favorite healthy breakfast recipe: Greek yogurt with berries, honey, and a sprinkle of granola. Quick, delicious, and packed with protein!",
-      image: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?q=80&w=500&auto=format&fit=crop",
-      likes: 56,
-      comments: 12,
-    },
+      title: "Nutrition Workshop",
+      date: "Aug 25, 2023 • 6:00 PM",
+      location: "Health Center, Brooklyn",
+      attendees: 18,
+      image: "https://images.unsplash.com/photo-1490818387583-1baba5e638af?auto=format&fit=crop&w=800&q=80"
+    }
   ];
 
   const groups = [
     {
-      name: "Marathon Runners",
-      description: "From beginners to advanced runners preparing for marathons and races.",
-      members: 1284,
-      image: "https://images.unsplash.com/photo-1530137204511-5ae8e720a8ee?q=80&w=500&auto=format&fit=crop",
+      name: "Weight Loss Support",
+      members: 1250,
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=150&q=80"
     },
     {
-      name: "Plant-Based Nutrition",
-      description: "Sharing tips, recipes and advice for plant-based diets.",
-      members: 945,
-      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=500&auto=format&fit=crop",
+      name: "Runners Club",
+      members: 876,
+      image: "https://images.unsplash.com/photo-1486218119243-13883505764c?auto=format&fit=crop&w=150&q=80"
     },
     {
-      name: "Mindfulness & Meditation",
-      description: "Learning to reduce stress and improve mental health through daily practice.",
-      members: 756,
-      image: "https://images.unsplash.com/photo-1474418397713-2f76dc3fe76a?q=80&w=500&auto=format&fit=crop",
-    },
-    {
-      name: "Weight Management",
-      description: "Supporting each other on weight loss or maintenance journeys.",
-      members: 1842,
-      image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=500&auto=format&fit=crop",
-    },
+      name: "Vegetarian Recipes",
+      members: 943,
+      image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=150&q=80"
+    }
   ];
 
   const challenges = [
     {
-      title: "30-Day Yoga Challenge",
-      description: "Complete at least 20 minutes of yoga every day for 30 days.",
-      participants: 458,
-      daysLeft: 18,
-      image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=500&auto=format&fit=crop",
+      title: "30-Day Core Challenge",
+      participants: 234,
+      progress: 40,
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=150&q=80"
     },
     {
-      title: "Sugar-Free Month",
-      description: "Cut out added sugars from your diet for one month.",
-      participants: 327,
-      daysLeft: 25,
-      image: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?q=80&w=500&auto=format&fit=crop",
-    },
-    {
-      title: "Step Challenge",
-      description: "Reach 10,000 steps daily for two weeks straight.",
-      participants: 712,
-      daysLeft: 7,
-      image: "https://images.unsplash.com/photo-1461788714782-aa2d1ed0b3b2?q=80&w=500&auto=format&fit=crop",
-    },
+      title: "10K Steps Challenge",
+      participants: 567,
+      progress: 75,
+      image: "https://images.unsplash.com/photo-1486218119243-13883505764c?auto=format&fit=crop&w=150&q=80"
+    }
   ];
 
   return (
     <div className="container px-4 py-8">
       <SectionHeader
         title="Community"
-        description="Connect, share, and learn with others on their health journey"
+        description="Connect with others, join groups, and participate in challenges"
         align="left"
       />
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-10">
-        {communityFeatures.map((feature, i) => (
-          <FeatureCard
-            key={i}
-            title={feature.title}
-            description={feature.description}
-            icon={feature.icon}
-          />
-        ))}
-      </div>
-      
-      <Tabs defaultValue="feed" className="mb-10">
-        <TabsList>
-          <TabsTrigger value="feed">Feed</TabsTrigger>
-          <TabsTrigger value="groups">Groups</TabsTrigger>
-          <TabsTrigger value="challenges">Challenges</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="feed" className="space-y-6 animate-fade-in">
-          <div className="border rounded-lg p-4 mb-6">
-            <Textarea placeholder="Share your health journey or ask a question..." className="mb-3" />
-            <div className="flex justify-between items-center">
-              <Button variant="outline" size="sm" className="gap-1">
-                <Heart className="h-4 w-4" /> Photos
-              </Button>
-              <Button>Post</Button>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search posts, events, or members..." 
+                className="pl-9"
+              />
             </div>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              New Post
+            </Button>
           </div>
           
-          {posts.map((post, i) => (
-            <CommunityPost key={i} {...post} />
-          ))}
-          
-          <Button variant="outline" className="w-full">Load More</Button>
-        </TabsContent>
+          <Tabs defaultValue="feed" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="feed">Feed</TabsTrigger>
+              <TabsTrigger value="events">Events</TabsTrigger>
+              <TabsTrigger value="groups">Groups</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="feed" className="space-y-4 animate-fade-in">
+              {posts.map((post, i) => (
+                <Post key={i} {...post} />
+              ))}
+              
+              <Button variant="outline" className="w-full">
+                Load More
+              </Button>
+            </TabsContent>
+            
+            <TabsContent value="events" className="animate-fade-in">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {events.map((event, i) => (
+                  <Event key={i} {...event} />
+                ))}
+              </div>
+              
+              <Button variant="outline" className="w-full mt-6">
+                View All Events
+              </Button>
+            </TabsContent>
+            
+            <TabsContent value="groups" className="animate-fade-in">
+              <div className="space-y-4">
+                {groups.map((group, i) => (
+                  <Card key={i} className="flex items-center p-4 gap-4">
+                    <img
+                      src={group.image}
+                      alt={group.name}
+                      className="w-16 h-16 rounded-lg object-cover"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-medium">{group.name}</h3>
+                      <p className="text-sm text-muted-foreground">{group.members} members</p>
+                    </div>
+                    <Button>Join</Button>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
         
-        <TabsContent value="groups" className="animate-fade-in">
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Input placeholder="Search for groups..." className="max-w-md" />
-              <Button>Search</Button>
+        <div className="space-y-6">
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Award className="h-5 w-5 text-primary" />
+              <h3 className="font-medium">Active Challenges</h3>
             </div>
             
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {groups.map((group, i) => (
-                <GroupCard key={i} {...group} />
-              ))}
-            </div>
-          </div>
-          
-          <Button variant="outline" className="w-full">View All Groups</Button>
-        </TabsContent>
-        
-        <TabsContent value="challenges" className="animate-fade-in">
-          <div className="mb-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-4">
               {challenges.map((challenge, i) => (
-                <ChallengeCard key={i} {...challenge} />
+                <div key={i} className="flex items-center gap-3">
+                  <img
+                    src={challenge.image}
+                    alt={challenge.title}
+                    className="w-12 h-12 rounded-lg object-cover"
+                  />
+                  <div className="flex-1">
+                    <h4 className="text-sm font-medium">{challenge.title}</h4>
+                    <div className="flex justify-between mt-1">
+                      <span className="text-xs text-muted-foreground">{challenge.participants} participants</span>
+                      <span className="text-xs font-medium">{challenge.progress}% complete</span>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
-          </div>
+            
+            <Button variant="outline" className="w-full mt-4">
+              Find Challenges
+            </Button>
+          </Card>
           
-          <Button variant="outline" className="w-full">View All Challenges</Button>
-        </TabsContent>
-      </Tabs>
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="h-5 w-5 text-primary" />
+              <h3 className="font-medium">Suggested Connections</h3>
+            </div>
+            
+            <div className="space-y-4">
+              {[1, 2, 3].map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarImage src={`https://i.pravatar.cc/150?img=${i + 10}`} />
+                    <AvatarFallback>U{i}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">User {i + 1}</div>
+                    <div className="text-xs text-muted-foreground">12 mutual connections</div>
+                  </div>
+                  <Button variant="outline" size="sm">Connect</Button>
+                </div>
+              ))}
+            </div>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <MessageSquare className="h-5 w-5 text-primary" />
+              <h3 className="font-medium">Recent Discussions</h3>
+            </div>
+            
+            <div className="space-y-3">
+              {["Healthy meal prep ideas for busy professionals", "Best apps for tracking workouts?", "Tips for staying motivated"].map((topic, i) => (
+                <div key={i} className="group flex items-center gap-2 cursor-pointer">
+                  <Heart className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <p className="text-sm group-hover:text-primary transition-colors">{topic}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
