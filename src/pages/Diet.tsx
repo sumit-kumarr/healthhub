@@ -123,7 +123,7 @@ const NutritionChart = () => (
           <span className="text-sm">Protein</span>
           <span className="text-sm font-medium">85 / 120 g</span>
         </div>
-        <Progress value={70.8} className="h-2 bg-muted" indicatorClassName="bg-blue-500" />
+        <Progress value={70.8} className="h-2 bg-muted" />
       </div>
       
       <div>
@@ -131,7 +131,7 @@ const NutritionChart = () => (
           <span className="text-sm">Carbs</span>
           <span className="text-sm font-medium">120 / 200 g</span>
         </div>
-        <Progress value={60} className="h-2 bg-muted" indicatorClassName="bg-green-500" />
+        <Progress value={60} className="h-2 bg-muted" />
       </div>
       
       <div>
@@ -139,7 +139,7 @@ const NutritionChart = () => (
           <span className="text-sm">Fat</span>
           <span className="text-sm font-medium">45 / 65 g</span>
         </div>
-        <Progress value={69.2} className="h-2 bg-muted" indicatorClassName="bg-yellow-500" />
+        <Progress value={69.2} className="h-2 bg-muted" />
       </div>
     </div>
   </div>
