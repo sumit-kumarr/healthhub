@@ -1,259 +1,265 @@
 
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   Home, 
-  Dumbbell, 
-  Salad, 
-  Brain, 
   Heart, 
-  Users, 
-  Moon, 
-  Sun, 
+  User, 
+  Settings, 
+  LogOut, 
   Menu, 
-  X,
-  User,
-  LogOut,
+  X, 
   Search,
-  Pill,
-  LayoutDashboard,
-  Settings
+  Activity,
+  BarChart2, 
+  Brain,
+  Pills,
+  Users,
+  Utensils,
+  MessageSquare,
+  LayoutDashboard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useTheme } from "@/components/ThemeProvider";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useMobile } from "@/hooks/use-mobile";
 
-const navItems = [
-  { name: "Home", path: "/", icon: Home },
-  { name: "Fitness", path: "/fitness", icon: Dumbbell },
-  { name: "Diet", path: "/diet", icon: Salad },
-  { name: "Mental Health", path: "/mental-health", icon: Brain },
-  { name: "Health Conditions", path: "/health-conditions", icon: Heart },
-  { name: "Community", path: "/community", icon: Users },
-  { name: "Medicine Search", path: "/medicine-search", icon: Pill },
-];
+// Helper function to determine active status
+const isLinkActive = (pathname: string, href: string) => {
+  if (href === '/') {
+    return pathname === '/';
+  }
+  return pathname.startsWith(href);
+};
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
+const Layout = () => {
   const { user, signOut } = useAuth();
-  const [mounted, setMounted] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const location = useLocation();
+  const isMobile = useMobile();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  
+  // Close the sidebar when navigating on mobile
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    // Close mobile menu when route changes
-    setIsMenuOpen(false);
-  }, [location.pathname]);
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/auth');
-  };
-
-  // Prevent content flash before theme loads
-  if (!mounted) return null;
-
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
+  }, [location.pathname, isMobile]);
+  
+  const mainNavItems = [
+    { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
+    { href: "/health-conditions", label: "Health Conditions", icon: <Activity className="h-5 w-5" /> },
+    { href: "/medicines", label: "Medicines", icon: <Pills className="h-5 w-5" /> },
+    { href: "/mental-health", label: "Mental Health", icon: <Brain className="h-5 w-5" /> },
+    { href: "/fitness", label: "Fitness", icon: <BarChart2 className="h-5 w-5" /> },
+    { href: "/diet", label: "Diet & Nutrition", icon: <Utensils className="h-5 w-5" /> },
+    { href: "/community", label: "Community", icon: <MessageSquare className="h-5 w-5" /> },
+  ];
+  
+  const sidebarClasses = isSidebarOpen 
+    ? "fixed inset-y-0 left-0 transform translate-x-0 transition-transform duration-300 ease-in-out z-50"
+    : "fixed inset-y-0 left-0 transform -translate-x-full transition-transform duration-300 ease-in-out z-50 md:translate-x-0";
+  
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Mobile Header */}
-      <header className="lg:hidden flex items-center justify-between p-4 bg-background border-b">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="relative h-8 w-8 bg-primary rounded-full flex items-center justify-center">
-            <Heart className="h-4 w-4 text-white" />
-          </div>
-          <span className="text-xl font-semibold">HealthHub</span>
+      {/* Mobile header */}
+      <header className="bg-sidebar border-b border-sidebar-border md:hidden py-4 px-6 flex items-center justify-between">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="text-sidebar-foreground"
+        >
+          <Menu className="h-6 w-6" />
+        </Button>
+        
+        <Link to="/" className="text-sidebar-foreground text-xl font-bold">
+          HealthTech
         </Link>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-full"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="rounded-full"
-          >
-            {isMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
-      </header>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-background pt-16 animate-fade-in">
-          <div className="flex flex-col p-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-4 text-lg",
-                  location.pathname === item.path
-                    ? "text-primary font-medium"
-                    : "text-muted-foreground"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                {item.name}
-              </Link>
-            ))}
-            
-            <Separator className="my-4" />
-            
-            {user ? (
-              <>
-                <Link
-                  to="/profile"
-                  className="flex items-center gap-3 px-3 py-4 text-lg text-muted-foreground"
-                >
-                  <User className="h-5 w-5" />
-                  Profile
-                </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center gap-3 px-3 py-4 text-lg text-muted-foreground"
-                >
-                  <LogOut className="h-5 w-5" />
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <Link
-                to="/auth"
-                className="flex items-center gap-3 px-3 py-4 text-lg text-muted-foreground"
-              >
-                <LogOut className="h-5 w-5" />
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
-
-      <div className="flex-1 flex">
-        {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex flex-col w-64 bg-sidebar border-r p-4">
-          <Link to="/" className="flex items-center gap-2 mb-8">
-            <div className="relative h-8 w-8 bg-primary rounded-full flex items-center justify-center">
-              <Heart className="h-4 w-4 text-white" />
-            </div>
-            <span className="text-xl font-semibold">HealthHub</span>
+        
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          asChild
+          className="text-sidebar-foreground"
+        >
+          <Link to="/medicines">
+            <Search className="h-5 w-5" />
           </Link>
-
-          <nav className="flex-1 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md",
-                  location.pathname === item.path
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-
-          <Separator className="my-4" />
-
-          <div className="flex items-center justify-between">
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 w-full justify-start px-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="" />
-                      <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="text-sm font-medium truncate max-w-[120px]">
-                      {user.email}
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/admin')}>
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>Admin Dashboard</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/medicine-search')}>
-                    <Search className="mr-2 h-4 w-4" />
-                    <span>Search Medicines</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/settings')}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Sign out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button asChild variant="outline" size="sm">
-                <Link to="/auth">Sign in</Link>
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="rounded-full"
+        </Button>
+      </header>
+      
+      {/* Sidebar */}
+      <aside className={sidebarClasses}>
+        <div className="h-full w-64 bg-sidebar text-sidebar-foreground flex flex-col">
+          {/* Close button - mobile only */}
+          <div className="md:hidden p-4 flex justify-end">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsSidebarOpen(false)}
+              className="text-sidebar-foreground"
             >
-              {theme === "dark" ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
+              <X className="h-6 w-6" />
             </Button>
           </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
-      </div>
+          
+          {/* Brand */}
+          <div className="p-6 border-b border-sidebar-border">
+            <Link to="/" className="text-xl font-bold">
+              HealthTech
+            </Link>
+          </div>
+          
+          {/* Main navigation */}
+          <nav className="flex-1 overflow-y-auto p-4">
+            <ul className="space-y-1">
+              {mainNavItems.map((item) => (
+                <li key={item.href}>
+                  <NavLink 
+                    to={item.href}
+                    className={({ isActive }) => 
+                      `flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                      }`
+                    }
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          
+          {/* User section */}
+          <div className="p-4 border-t border-sidebar-border">
+            <div className="relative">
+              <Button
+                variant="ghost"
+                className="w-full flex items-center justify-between"
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">My Account</span>
+                </div>
+              </Button>
+              
+              {isProfileMenuOpen && (
+                <div className="absolute bottom-full mb-2 w-full bg-popover rounded-md shadow-md border border-border overflow-hidden">
+                  <ul className="py-1">
+                    <li>
+                      <NavLink 
+                        to="/profile" 
+                        className={({ isActive }) => 
+                          `flex items-center gap-3 px-3 py-2 transition-colors ${
+                            isActive
+                              ? "bg-accent text-accent-foreground"
+                              : "hover:bg-accent hover:text-accent-foreground"
+                          }`
+                        }
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <User className="h-4 w-4" />
+                        <span>Profile</span>
+                      </NavLink>
+                    </li>
+                    
+                    {user?.email === "admin@example.com" && (
+                      <li>
+                        <NavLink 
+                          to="/admin" 
+                          className={({ isActive }) => 
+                            `flex items-center gap-3 px-3 py-2 transition-colors ${
+                              isActive
+                                ? "bg-accent text-accent-foreground"
+                                : "hover:bg-accent hover:text-accent-foreground"
+                            }`
+                          }
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        >
+                          <LayoutDashboard className="h-4 w-4" />
+                          <span>Admin Dashboard</span>
+                        </NavLink>
+                      </li>
+                    )}
+                    
+                    <li>
+                      <NavLink 
+                        to="/medicines/search" 
+                        className={({ isActive }) => 
+                          `flex items-center gap-3 px-3 py-2 transition-colors ${
+                            isActive
+                              ? "bg-accent text-accent-foreground"
+                              : "hover:bg-accent hover:text-accent-foreground"
+                          }`
+                        }
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <Search className="h-4 w-4" />
+                        <span>Search Medicines</span>
+                      </NavLink>
+                    </li>
+                    
+                    <li>
+                      <NavLink 
+                        to="/settings" 
+                        className={({ isActive }) => 
+                          `flex items-center gap-3 px-3 py-2 transition-colors ${
+                            isActive
+                              ? "bg-accent text-accent-foreground"
+                              : "hover:bg-accent hover:text-accent-foreground"
+                          }`
+                        }
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <Settings className="h-4 w-4" />
+                        <span>Settings</span>
+                      </NavLink>
+                    </li>
+                    
+                    <li>
+                      <button
+                        className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground transition-colors"
+                        onClick={() => {
+                          setIsProfileMenuOpen(false);
+                          signOut();
+                        }}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>Sign out</span>
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </aside>
+      
+      {/* Mobile sidebar backdrop */}
+      {isSidebarOpen && (
+        <Dialog open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+          <DialogContent className="hidden" />
+        </Dialog>
+      )}
+      
+      {/* Main content */}
+      <main className="flex-1 md:pl-64">
+        <div className="mx-auto">
+          <Outlet />
+        </div>
+      </main>
+      
+      <Toaster />
     </div>
   );
 };

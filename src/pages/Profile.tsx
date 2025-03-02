@@ -1,435 +1,374 @@
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Check, Camera, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
 import { SectionHeader } from "@/components/ui/section-header";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, FileText, User, Mail, Shield } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-
-const profileSchema = z.object({
-  first_name: z.string().min(2, "First name must be at least 2 characters").optional(),
-  last_name: z.string().min(2, "Last name must be at least 2 characters").optional(),
-  email: z.string().email("Invalid email address").optional(),
-});
-
-const securitySchema = z.object({
-  current_password: z.string().min(6, "Password must be at least 6 characters"),
-  new_password: z.string().min(6, "Password must be at least 6 characters"),
-  confirm_password: z.string().min(6, "Password must be at least 6 characters"),
-}).refine((data) => data.new_password === data.confirm_password, {
-  message: "Passwords do not match",
-  path: ["confirm_password"],
-});
+import { supabase } from "@/integrations/supabase/client";
 
 const ProfilePage = () => {
-  const { user, updateProfile } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("general");
-  const [profileData, setProfileData] = useState<{ first_name?: string; last_name?: string; avatar_url?: string; }>({});
+  const { user } = useAuth();
   const { toast } = useToast();
-
-  const profileForm = useForm<z.infer<typeof profileSchema>>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      first_name: "",
-      last_name: "",
-      email: user?.email || "",
-    },
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
   });
-
-  const securityForm = useForm<z.infer<typeof securitySchema>>({
-    resolver: zodResolver(securitySchema),
-    defaultValues: {
-      current_password: "",
-      new_password: "",
-      confirm_password: "",
-    },
-  });
-
+  
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
-      
+    const getProfile = async () => {
       try {
         setLoading(true);
+        if (!user?.id) return;
+        
         const { data, error } = await supabase
-          .from("profiles")
-          .select("first_name, last_name, avatar_url")
-          .eq("id", user.id)
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
           .single();
-
+        
         if (error) {
-          console.error("Error fetching profile:", error);
-          return;
+          throw error;
         }
-
+        
         if (data) {
-          setProfileData(data);
-          profileForm.reset({
-            first_name: data.first_name || "",
-            last_name: data.last_name || "",
+          setProfile(data);
+          setFormData({
+            firstName: data.first_name || "",
+            lastName: data.last_name || "",
             email: user.email || "",
           });
         }
-      } catch (error) {
-        console.error("Error:", error);
+      } catch (error: any) {
+        console.error('Error fetching profile:', error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to load profile",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
-
-    fetchProfile();
-  }, [user, profileForm]);
-
-  const onProfileSubmit = async (data: z.infer<typeof profileSchema>) => {
-    if (!user) return;
     
-    setLoading(true);
+    if (user) {
+      getProfile();
+    }
+  }, [user, toast]);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  
+  const handleUpdateProfile = async () => {
     try {
-      const updateData = {
-        first_name: data.first_name,
-        last_name: data.last_name,
-      };
+      setUpdating(true);
       
-      const { error } = await updateProfile(updateData);
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+        })
+        .eq('id', user?.id);
       
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
+        throw error;
       }
       
       toast({
-        title: "Success",
-        description: "Your profile has been updated.",
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
       });
       
-      // Update local state
-      setProfileData(prev => ({ ...prev, ...updateData }));
+      // Update the profile state
+      setProfile((prev: any) => ({
+        ...prev,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+      }));
+      
     } catch (error: any) {
+      console.error('Error updating profile:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to update profile",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setUpdating(false);
     }
   };
-
-  const onSecuritySubmit = async (data: z.infer<typeof securitySchema>) => {
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: data.new_password,
-      });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      toast({
-        title: "Success",
-        description: "Your password has been updated.",
-      });
-      
-      securityForm.reset({
-        current_password: "",
-        new_password: "",
-        confirm_password: "",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user || !e.target.files || e.target.files.length === 0) return;
-    
-    const file = e.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const filePath = `${user.id}/${Math.random().toString(36).substring(2)}.${fileExt}`;
-    
-    setLoading(true);
-    try {
-      // Upload file to storage
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
-        
-      if (uploadError) {
-        toast({
-          title: "Upload Error",
-          description: uploadError.message,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-        
-      // Update profile with new avatar URL
-      const avatar_url = urlData.publicUrl;
-      const { error: updateError } = await updateProfile({ avatar_url });
-      
-      if (updateError) {
-        toast({
-          title: "Update Error",
-          description: updateError.message,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Update local state
-      setProfileData(prev => ({ ...prev, avatar_url }));
-      
-      toast({
-        title: "Success",
-        description: "Your profile picture has been updated.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!user) {
+  
+  if (loading) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <p>Please sign in to view your profile.</p>
-        <Button asChild className="mt-4">
-          <a href="/auth">Sign In</a>
-        </Button>
+      <div className="container mx-auto p-6">
+        <p>Loading profile...</p>
       </div>
     );
   }
-
+  
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container px-4 py-8">
       <SectionHeader
-        title="Profile Settings"
-        description="Manage your account information and security settings"
+        title="My Profile"
+        description="View and manage your account information"
         align="left"
-        className="mb-8"
       />
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Sidebar */}
-        <div className="md:col-span-1">
+      
+      <div className="grid gap-6 md:grid-cols-3">
+        <div>
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center mb-6">
-                <div className="relative mb-4">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={profileData.avatar_url || ""} />
-                    <AvatarFallback className="text-2xl">
-                      {profileData.first_name ? profileData.first_name[0] : user.email ? user.email[0].toUpperCase() : "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <label 
-                    htmlFor="avatar-upload" 
-                    className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-1.5 rounded-full cursor-pointer hover:bg-primary/90 transition-colors"
-                  >
-                    <Camera className="h-4 w-4" />
-                    <input 
-                      id="avatar-upload" 
-                      type="file" 
-                      accept="image/*" 
-                      className="sr-only" 
-                      onChange={handleFileUpload}
-                      disabled={loading}
-                    />
-                  </label>
+            <CardHeader className="space-y-4">
+              <div className="flex flex-col items-center">
+                <Avatar className="h-20 w-20 mb-4">
+                  <AvatarImage src={profile?.avatar_url} alt={formData.firstName} />
+                  <AvatarFallback className="text-2xl">
+                    {formData.firstName?.[0]}{formData.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold">{formData.firstName} {formData.lastName}</h3>
+                  <p className="text-sm text-muted-foreground">{formData.email}</p>
                 </div>
-                <h3 className="font-semibold text-lg">
-                  {profileData.first_name && profileData.last_name 
-                    ? `${profileData.first_name} ${profileData.last_name}`
-                    : user.email?.split('@')[0]
-                  }
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {user.email}
-                </p>
               </div>
-
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="w-full">
-                  <TabsTrigger value="general" className="flex-1">General</TabsTrigger>
-                  <TabsTrigger value="security" className="flex-1">Security</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </CardContent>
+              
+              <div className="flex justify-center">
+                <Button className="w-full" variant="outline">
+                  Change Photo
+                </Button>
+              </div>
+              
+              <Separator />
+              
+              <div className="space-y-3">
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4 mr-2" />
+                  {formData.email}
+                </div>
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Account created: {new Date(profile?.created_at).toLocaleDateString()}
+                </div>
+                <div className="flex items-center text-sm">
+                  <Shield className="h-4 w-4 mr-2" />
+                  <Badge variant="outline" className="px-2 py-0">
+                    Standard Plan
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
           </Card>
         </div>
-
-        {/* Main Content */}
+        
         <div className="md:col-span-2">
-          <Card>
-            <TabsContent value="general" className="mt-0">
-              <CardHeader>
-                <CardTitle>General Information</CardTitle>
-                <CardDescription>
-                  Update your personal information
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...profileForm}>
-                  <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={profileForm.control}
-                        name="first_name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter first name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={profileForm.control}
-                        name="last_name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter last name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+          <Tabs defaultValue="personal-info">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="personal-info">Personal Info</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsTrigger value="preferences">Preferences</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="personal-info">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Personal Information</CardTitle>
+                  <CardDescription>
+                    Update your personal details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
                       />
                     </div>
-                    <FormField
-                      control={profileForm.control}
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
                       name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input disabled {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            To change your email, contact support.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      disabled
                     />
-                    <div className="flex justify-end">
-                      <Button type="submit" disabled={loading}>
-                        {loading ? "Saving..." : "Save Changes"}
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </CardContent>
+                    <p className="text-xs text-muted-foreground">
+                      Your email cannot be changed. Contact support for assistance.
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={handleUpdateProfile} 
+                    disabled={updating}
+                    className="mt-4"
+                  >
+                    {updating ? "Updating..." : "Update Profile"}
+                  </Button>
+                </CardContent>
+              </Card>
             </TabsContent>
-
-            <TabsContent value="security" className="mt-0">
-              <CardHeader>
-                <CardTitle>Security Settings</CardTitle>
-                <CardDescription>
-                  Update your password and security preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...securityForm}>
-                  <form onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="space-y-6">
-                    <FormField
-                      control={securityForm.control}
-                      name="current_password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Current Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Enter your current password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={securityForm.control}
-                        name="new_password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>New Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" placeholder="Enter new password" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={securityForm.control}
-                        name="confirm_password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Confirm Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" placeholder="Confirm new password" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+            
+            <TabsContent value="activity">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                  <CardDescription>
+                    Your recent actions and activities
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="border rounded-lg divide-y">
+                      <div className="p-4 flex items-start gap-4">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                          <FileText className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between">
+                            <p className="font-medium">Profile Updated</p>
+                            <span className="text-xs text-muted-foreground">Today</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            You updated your profile information
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 flex items-start gap-4">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                          <User className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between">
+                            <p className="font-medium">Logged In</p>
+                            <span className="text-xs text-muted-foreground">2 days ago</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            You logged in from a new device
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 flex items-start gap-4">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                          <Clock className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between">
+                            <p className="font-medium">Account Created</p>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(profile?.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            You created your account
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-end">
-                      <Button type="submit" disabled={loading}>
-                        {loading ? "Updating..." : "Update Password"}
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </CardContent>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
-          </Card>
+            
+            <TabsContent value="preferences">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Preferences</CardTitle>
+                  <CardDescription>
+                    Manage your notification and privacy settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    These settings control how we communicate with you and how your data is handled.
+                  </p>
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="font-medium mb-2">Email Notifications</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="marketing" className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="marketing" className="rounded" />
+                            Marketing emails
+                          </Label>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="updates" className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="updates" className="rounded" defaultChecked />
+                            Product updates
+                          </Label>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="security" className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="security" className="rounded" defaultChecked />
+                            Security alerts
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
+                      <h3 className="font-medium mb-2">Privacy Settings</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="data-collection" className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="data-collection" className="rounded" defaultChecked />
+                            Allow data collection for service improvement
+                          </Label>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="public-profile" className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="public-profile" className="rounded" />
+                            Make my profile public
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Button>Save Preferences</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
