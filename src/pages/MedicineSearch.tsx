@@ -145,12 +145,12 @@ const MedicineSearchPage = () => {
     }
     
     // Filter by category
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== "all-categories") {
       results = results.filter(med => med.category === selectedCategory);
     }
     
     // Filter by condition
-    if (selectedCondition) {
+    if (selectedCondition && selectedCondition !== "all-conditions") {
       results = results.filter(med => med.condition.includes(selectedCondition));
     }
     
@@ -211,7 +211,7 @@ const MedicineSearchPage = () => {
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Categories</SelectItem>
+                      <SelectItem value="all-categories">All Categories</SelectItem>
                       {categories.map((category) => (
                         <SelectItem key={category} value={category}>
                           {category}
@@ -228,7 +228,7 @@ const MedicineSearchPage = () => {
                       <SelectValue placeholder="Select a condition" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Conditions</SelectItem>
+                      <SelectItem value="all-conditions">All Conditions</SelectItem>
                       {conditions.map((condition) => (
                         <SelectItem key={condition} value={condition}>
                           {condition}
@@ -260,7 +260,7 @@ const MedicineSearchPage = () => {
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all-categories">All Categories</SelectItem>
             {categories.map((category) => (
               <SelectItem key={category} value={category}>
                 {category}
@@ -274,7 +274,7 @@ const MedicineSearchPage = () => {
             <SelectValue placeholder="Filter by condition" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Conditions</SelectItem>
+            <SelectItem value="all-conditions">All Conditions</SelectItem>
             {conditions.map((condition) => (
               <SelectItem key={condition} value={condition}>
                 {condition}
