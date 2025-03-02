@@ -13,7 +13,7 @@ import {
   Activity,
   BarChart2, 
   Brain,
-  Pills,
+  Pill,
   Users,
   Utensils,
   MessageSquare,
@@ -24,7 +24,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Helper function to determine active status
 const isLinkActive = (pathname: string, href: string) => {
@@ -37,7 +37,7 @@ const isLinkActive = (pathname: string, href: string) => {
 const Layout = () => {
   const { user, signOut } = useAuth();
   const location = useLocation();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   
@@ -51,7 +51,7 @@ const Layout = () => {
   const mainNavItems = [
     { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
     { href: "/health-conditions", label: "Health Conditions", icon: <Activity className="h-5 w-5" /> },
-    { href: "/medicines", label: "Medicines", icon: <Pills className="h-5 w-5" /> },
+    { href: "/medicines", label: "Medicines", icon: <Pill className="h-5 w-5" /> },
     { href: "/mental-health", label: "Mental Health", icon: <Brain className="h-5 w-5" /> },
     { href: "/fitness", label: "Fitness", icon: <BarChart2 className="h-5 w-5" /> },
     { href: "/diet", label: "Diet & Nutrition", icon: <Utensils className="h-5 w-5" /> },

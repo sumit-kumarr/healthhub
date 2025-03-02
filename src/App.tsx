@@ -71,97 +71,104 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               
               {/* Protected routes */}
-              <Route path="/" element={
-                <Layout>
-                  <HomePage />
-                </Layout>
-              } />
-              <Route path="/fitness" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <FitnessPage />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/diet" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <DietPage />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/mental-health" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <MentalHealthPage />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/health-conditions" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <HealthConditionsPage />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/community" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <CommunityPage />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <ProfilePage />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/medicine-search" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <MedicineSearchPage />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/medicine/:id" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <MedicineDetailsPage />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              
-              {/* Admin routes */}
-              <Route path="/admin" element={
-                <AdminRoute>
-                  <Layout>
-                    <AdminDashboardPage />
-                  </Layout>
-                </AdminRoute>
-              } />
-              <Route path="/admin/medicines" element={
-                <AdminRoute>
-                  <Layout>
-                    <AdminMedicinesPage />
-                  </Layout>
-                </AdminRoute>
-              } />
-              <Route path="/admin/users" element={
-                <AdminRoute>
-                  <Layout>
-                    <AdminUsersPage />
-                  </Layout>
-                </AdminRoute>
-              } />
-              
-              {/* Catch-all route */}
-              <Route path="*" element={
-                <Layout>
-                  <NotFound />
-                </Layout>
-              } />
+              <Route 
+                path="/" 
+                element={<Layout />}>
+                <Route index element={<HomePage />} />
+                <Route 
+                  path="/fitness" 
+                  element={
+                    <ProtectedRoute>
+                      <FitnessPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/diet" 
+                  element={
+                    <ProtectedRoute>
+                      <DietPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/mental-health" 
+                  element={
+                    <ProtectedRoute>
+                      <MentalHealthPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/health-conditions" 
+                  element={
+                    <ProtectedRoute>
+                      <HealthConditionsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/community" 
+                  element={
+                    <ProtectedRoute>
+                      <CommunityPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/profile" 
+                  element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/medicine-search" 
+                  element={
+                    <ProtectedRoute>
+                      <MedicineSearchPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/medicine/:id" 
+                  element={
+                    <ProtectedRoute>
+                      <MedicineDetailsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                {/* Admin routes */}
+                <Route 
+                  path="/admin" 
+                  element={
+                    <AdminRoute>
+                      <AdminDashboardPage />
+                    </AdminRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/medicines" 
+                  element={
+                    <AdminRoute>
+                      <AdminMedicinesPage />
+                    </AdminRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/users" 
+                  element={
+                    <AdminRoute>
+                      <AdminUsersPage />
+                    </AdminRoute>
+                  } 
+                />
+                
+                {/* Catch-all route */}
+                <Route path="*" element={<NotFound />} />
+              </Route>
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
