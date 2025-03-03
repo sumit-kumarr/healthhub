@@ -23,6 +23,8 @@ import MedicineDetailsPage from "./pages/MedicineDetails";
 import AdminDashboardPage from "./pages/admin/Dashboard";
 import AdminMedicinesPage from "./pages/admin/Medicines";
 import AdminUsersPage from "./pages/admin/Users";
+import NotificationsPage from "./pages/Notifications";
+import HealthAssessmentPage from "./pages/HealthAssessment";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +54,10 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  if (user.email !== "admin@example.com") {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -108,6 +114,14 @@ const App = () => (
                   } 
                 />
                 <Route 
+                  path="/health-assessment" 
+                  element={
+                    <ProtectedRoute>
+                      <HealthAssessmentPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
                   path="/community" 
                   element={
                     <ProtectedRoute>
@@ -120,6 +134,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <ProfilePage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/notifications" 
+                  element={
+                    <ProtectedRoute>
+                      <NotificationsPage />
                     </ProtectedRoute>
                   } 
                 />

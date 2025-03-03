@@ -6,11 +6,22 @@ import { Toaster } from "@/components/ui/toaster";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileHeader from "./layout/MobileHeader";
 import Sidebar from "./layout/Sidebar";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Layout = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  
+  // Check if user is authenticated
+  useEffect(() => {
+    if (!loading && !user && !location.pathname.includes('/auth')) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate, location.pathname]);
   
   // Close the sidebar when navigating on mobile
   useEffect(() => {
@@ -34,7 +45,7 @@ const Layout = () => {
       {/* Mobile sidebar backdrop */}
       {isMobile && isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-all duration-300" 
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
