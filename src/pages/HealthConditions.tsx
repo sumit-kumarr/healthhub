@@ -8,11 +8,11 @@ import {
   Activity, 
   Clock, 
   Plus,
-  Lungs,
   Brain,
   Bone,
   Pill,
-  Dumbbell
+  Dumbbell,
+  Microscope // Replacing Lungs with Microscope which is available in lucide-react
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -262,7 +262,7 @@ const HealthConditionsPage = () => {
     {
       title: "Asthma Control",
       description: "Managing asthma symptoms and triggers",
-      icon: <Lungs className="h-4 w-4" />,
+      icon: <Microscope className="h-4 w-4" />, // Changed from Lungs to Microscope
       category: "Respiratory",
       longDescription: "Asthma is a condition in which your airways narrow and swell and may produce extra mucus. This can make breathing difficult and trigger coughing, a whistling sound (wheezing) when you breathe out and shortness of breath. For some people, asthma is a minor nuisance. For others, it can be a major problem that interferes with daily activities and may lead to a life-threatening asthma attack.",
       tips: [
@@ -310,7 +310,7 @@ const HealthConditionsPage = () => {
           name: "Breathing Exercises",
           duration: "10-15 minutes daily",
           description: "Techniques like pursed lip breathing and diaphragmatic breathing can strengthen respiratory muscles.",
-          icon: <Lungs className="h-4 w-4" />
+          icon: <Microscope className="h-4 w-4" />
         }
       ]
     },
