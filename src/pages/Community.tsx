@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { 
   Users, 
   MessageSquare, 
@@ -8,9 +9,9 @@ import {
   Calendar, 
   Search,
   Plus,
-  Share2,
-  ThumbsUp,
-  MessageCircle
+  MessageCircle,
+  Filter,
+  Video
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,99 +20,16 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { SectionHeader } from "@/components/ui/section-header";
-
-interface PostProps {
-  user: {
-    name: string;
-    avatar: string;
-    badge?: string;
-  };
-  content: string;
-  image?: string;
-  likes: number;
-  comments: number;
-  time: string;
-}
-
-const Post = ({ user, content, image, likes, comments, time }: PostProps) => (
-  <Card className="p-4 space-y-4">
-    <div className="flex items-center gap-3">
-      <Avatar>
-        <AvatarImage src={user.avatar} />
-        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-      </Avatar>
-      <div>
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{user.name}</span>
-          {user.badge && (
-            <Badge variant="outline" className="text-xs font-normal">
-              {user.badge}
-            </Badge>
-          )}
-        </div>
-        <div className="text-xs text-muted-foreground">{time}</div>
-      </div>
-    </div>
-    
-    <div>
-      <p className="text-sm">{content}</p>
-      {image && (
-        <img 
-          src={image} 
-          alt="Post" 
-          className="mt-3 rounded-lg w-full object-cover max-h-72" 
-        />
-      )}
-    </div>
-    
-    <div className="flex justify-between pt-2 border-t">
-      <Button variant="ghost" size="sm" className="gap-1">
-        <ThumbsUp className="h-4 w-4" />
-        <span>{likes}</span>
-      </Button>
-      <Button variant="ghost" size="sm" className="gap-1">
-        <MessageCircle className="h-4 w-4" />
-        <span>{comments}</span>
-      </Button>
-      <Button variant="ghost" size="sm">
-        <Share2 className="h-4 w-4" />
-      </Button>
-    </div>
-  </Card>
-);
-
-interface EventProps {
-  title: string;
-  date: string;
-  location: string;
-  attendees: number;
-  image: string;
-}
-
-const Event = ({ title, date, location, attendees, image }: EventProps) => (
-  <Card className="overflow-hidden">
-    <img 
-      src={image} 
-      alt={title} 
-      className="w-full h-40 object-cover" 
-    />
-    <div className="p-4">
-      <h3 className="font-medium mb-1">{title}</h3>
-      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-        <Calendar className="h-4 w-4" />
-        <span>{date}</span>
-      </div>
-      <p className="text-sm text-muted-foreground mb-4">{location}</p>
-      <div className="flex justify-between items-center">
-        <span className="text-xs text-muted-foreground">{attendees} attending</span>
-        <Button size="sm">Join</Button>
-      </div>
-    </div>
-  </Card>
-);
+import { UserPost } from "@/components/community/UserPost";
+import { ExpertSession } from "@/components/community/ExpertSession";
+import { FitnessGroup } from "@/components/community/FitnessGroup";
+import { Separator } from "@/components/ui/separator";
 
 const CommunityPage = () => {
-  const posts: PostProps[] = [
+  const [activeTab, setActiveTab] = useState("feed");
+  
+  // Sample posts data 
+  const posts = [
     {
       user: {
         name: "Sarah Johnson",
@@ -122,7 +40,8 @@ const CommunityPage = () => {
       image: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80",
       likes: 34,
       comments: 8,
-      time: "2 hours ago"
+      time: "2 hours ago",
+      tags: ["running", "cardio", "morningworkout"]
     },
     {
       user: {
@@ -132,7 +51,8 @@ const CommunityPage = () => {
       content: "I've been following the Mediterranean diet for 3 weeks now and I'm feeling so much better. Anyone else tried it? Would love some recipe recommendations!",
       likes: 22,
       comments: 15,
-      time: "5 hours ago"
+      time: "5 hours ago",
+      tags: ["mediterraneandiet", "nutrition", "healthyeating"]
     },
     {
       user: {
@@ -143,52 +63,90 @@ const CommunityPage = () => {
       content: "Three key habits for better sleep: 1) Consistent sleep schedule 2) No screens 1 hour before bed 3) Keep your bedroom cool. What works for you?",
       likes: 56,
       comments: 23,
-      time: "Yesterday"
+      time: "Yesterday",
+      tags: ["sleep", "wellness", "healthhabits"]
     }
   ];
 
-  const events: EventProps[] = [
+  // Sample expert sessions data
+  const expertSessions = [
     {
-      title: "Community 5K Run",
-      date: "Aug 15, 2023 • 8:00 AM",
-      location: "Central Park, New York",
-      attendees: 45,
-      image: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=800&q=80"
+      expert: {
+        name: "Dr. Lisa Rodriguez",
+        title: "Cardiologist, MD",
+        avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=150&q=80",
+        specialty: "Heart Health",
+      },
+      topic: "Cardio Exercise & Heart Health: Myths vs Facts",
+      date: "Today",
+      time: "7:00 PM - 8:00 PM EST",
+      attendees: 156,
+      isLive: true
     },
     {
-      title: "Yoga in the Park",
-      date: "Aug 20, 2023 • 9:00 AM",
-      location: "Riverside Park, New York",
-      attendees: 32,
-      image: "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&w=800&q=80"
+      expert: {
+        name: "Jake Williams",
+        title: "Certified Personal Trainer",
+        avatar: "https://images.unsplash.com/photo-1506919258185-6078bba55d2a?auto=format&fit=crop&w=150&q=80",
+        specialty: "Strength Training",
+      },
+      topic: "Building Muscle: The Right Way to Lift",
+      date: "Aug 23, 2023",
+      time: "6:30 PM - 7:30 PM EST",
+      attendees: 89
     },
     {
-      title: "Nutrition Workshop",
-      date: "Aug 25, 2023 • 6:00 PM",
-      location: "Health Center, Brooklyn",
-      attendees: 18,
-      image: "https://images.unsplash.com/photo-1490818387583-1baba5e638af?auto=format&fit=crop&w=800&q=80"
+      expert: {
+        name: "Dr. Maya Patel",
+        title: "Nutritionist, PhD",
+        avatar: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=150&q=80",
+        specialty: "Plant-Based Nutrition",
+      },
+      topic: "Plant-Based Proteins: Complete Nutrition Guide",
+      date: "Aug 15, 2023",
+      time: "5:00 PM - 6:00 PM EST",
+      attendees: 205,
+      recording: "#"
     }
   ];
 
+  // Sample groups data
   const groups = [
     {
       name: "Weight Loss Support",
-      members: 1250,
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=150&q=80"
+      description: "A supportive community for those on a weight loss journey. Share tips, celebrate victories, and stay motivated together.",
+      memberCount: 1250,
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=150&q=80",
+      tags: ["WeightLoss", "Support", "Motivation"],
+      isJoined: true
     },
     {
       name: "Runners Club",
-      members: 876,
-      image: "https://images.unsplash.com/photo-1486218119243-13883505764c?auto=format&fit=crop&w=150&q=80"
+      description: "For beginners and seasoned runners alike. Training plans, race information, and running buddies.",
+      memberCount: 876,
+      image: "https://images.unsplash.com/photo-1486218119243-13883505764c?auto=format&fit=crop&w=150&q=80",
+      tags: ["Running", "Training", "Races"],
+      isJoined: false
     },
     {
       name: "Vegetarian Recipes",
-      members: 943,
-      image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=150&q=80"
+      description: "Exchange delicious and nutritious vegetarian recipes, cooking tips, and meal planning ideas.",
+      memberCount: 943,
+      image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=150&q=80",
+      tags: ["Vegetarian", "Recipes", "Cooking"],
+      isJoined: false
+    },
+    {
+      name: "Yoga & Mindfulness",
+      description: "Connect with others interested in yoga, meditation, and mindful living practices for overall wellbeing.",
+      memberCount: 1105,
+      image: "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&w=150&q=80",
+      tags: ["Yoga", "Meditation", "Mindfulness"],
+      isJoined: false
     }
   ];
 
+  // Sample challenges
   const challenges = [
     {
       title: "30-Day Core Challenge",
@@ -214,7 +172,7 @@ const CommunityPage = () => {
       
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
@@ -222,22 +180,34 @@ const CommunityPage = () => {
                 className="pl-9"
               />
             </div>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              New Post
-            </Button>
+            
+            <div className="flex gap-2">
+              <Button className="gap-2 flex-1 md:flex-none">
+                <Plus className="h-4 w-4" />
+                New Post
+              </Button>
+              
+              <Button variant="outline" className="gap-2 md:hidden">
+                <Filter className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           
-          <Tabs defaultValue="feed" className="space-y-6">
-            <TabsList>
+          <Tabs 
+            defaultValue="feed" 
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-6"
+          >
+            <TabsList className="grid grid-cols-3">
               <TabsTrigger value="feed">Feed</TabsTrigger>
-              <TabsTrigger value="events">Events</TabsTrigger>
+              <TabsTrigger value="experts">Expert Q&A</TabsTrigger>
               <TabsTrigger value="groups">Groups</TabsTrigger>
             </TabsList>
             
             <TabsContent value="feed" className="space-y-4 animate-fade-in">
               {posts.map((post, i) => (
-                <Post key={i} {...post} />
+                <UserPost key={i} {...post} />
               ))}
               
               <Button variant="outline" className="w-full">
@@ -245,35 +215,55 @@ const CommunityPage = () => {
               </Button>
             </TabsContent>
             
-            <TabsContent value="events" className="animate-fade-in">
-              <div className="grid gap-4 sm:grid-cols-2">
-                {events.map((event, i) => (
-                  <Event key={i} {...event} />
+            <TabsContent value="experts" className="space-y-6 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-medium">Expert Q&A Sessions</h2>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Calendar className="h-4 w-4" />
+                  View Schedule
+                </Button>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2">
+                {expertSessions.map((session, i) => (
+                  <ExpertSession key={i} {...session} />
                 ))}
               </div>
               
-              <Button variant="outline" className="w-full mt-6">
-                View All Events
-              </Button>
+              <Card className="p-4 bg-muted/50 border-dashed">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-full bg-primary/10 p-3">
+                    <Video className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium">Have an expert topic suggestion?</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Let us know what health or fitness topics you'd like to learn more about.
+                    </p>
+                  </div>
+                  <Button size="sm">Suggest Topic</Button>
+                </div>
+              </Card>
             </TabsContent>
             
-            <TabsContent value="groups" className="animate-fade-in">
+            <TabsContent value="groups" className="space-y-6 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-medium">Fitness Groups</h2>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Plus className="h-4 w-4" />
+                  Create Group
+                </Button>
+              </div>
+              
               <div className="space-y-4">
                 {groups.map((group, i) => (
-                  <Card key={i} className="flex items-center p-4 gap-4">
-                    <img
-                      src={group.image}
-                      alt={group.name}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-medium">{group.name}</h3>
-                      <p className="text-sm text-muted-foreground">{group.members} members</p>
-                    </div>
-                    <Button>Join</Button>
-                  </Card>
+                  <FitnessGroup key={i} {...group} />
                 ))}
               </div>
+              
+              <Button variant="outline" className="w-full">
+                Browse All Groups
+              </Button>
             </TabsContent>
           </Tabs>
         </div>
@@ -304,9 +294,11 @@ const CommunityPage = () => {
               ))}
             </div>
             
-            <Button variant="outline" className="w-full mt-4">
-              Find Challenges
-            </Button>
+            <Link to="/challenges">
+              <Button variant="outline" className="w-full mt-4">
+                View All Challenges
+              </Button>
+            </Link>
           </Card>
           
           <Card className="p-4">
@@ -341,10 +333,22 @@ const CommunityPage = () => {
             <div className="space-y-3">
               {["Healthy meal prep ideas for busy professionals", "Best apps for tracking workouts?", "Tips for staying motivated"].map((topic, i) => (
                 <div key={i} className="group flex items-center gap-2 cursor-pointer">
-                  <Heart className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <MessageCircle className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm group-hover:text-primary transition-colors">{topic}</p>
                 </div>
               ))}
+            </div>
+            
+            <Separator className="my-4" />
+            
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground mb-3">
+                Share your health journey and connect with others
+              </p>
+              <Button variant="outline" size="sm" className="gap-1">
+                <Heart className="h-4 w-4" />
+                Community Guidelines
+              </Button>
             </div>
           </Card>
         </div>

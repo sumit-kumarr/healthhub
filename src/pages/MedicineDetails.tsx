@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, AlertCircle, Clock, Calendar, Tag, Heart } from "lucide-react";
+import { ArrowLeft, AlertCircle, Clock, Calendar, Tag, Heart, Star, Plus, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,8 +9,25 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { MedicineReview } from "@/components/medicine/MedicineReview";
+import { MedicineRatingForm } from "@/components/medicine/MedicineRatingForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
+interface MedicineReview {
+  id: string;
+  user: {
+    name: string;
+    avatar?: string;
+    verified?: boolean;
+  };
+  rating: number;
+  date: string;
+  content: string;
+  helpfulCount: number;
+  condition?: string;
+  duration?: string;
+}
 
 const MedicineDetailsPage = () => {
   const { id } = useParams();
@@ -19,8 +36,58 @@ const MedicineDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [medicine, setMedicine] = useState<any>(null);
   const [relatedMedicines, setRelatedMedicines] = useState<any[]>([]);
+  const [alternativeMedicines, setAlternativeMedicines] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<MedicineReview[]>([]);
+  const [activeReviewsTab, setActiveReviewsTab] = useState("all");
+  
+  // Sample reviews data (in a real app, this would come from the database)
+  const sampleReviews: MedicineReview[] = [
+    {
+      id: "1",
+      user: {
+        name: "John D.",
+        avatar: "https://i.pravatar.cc/150?img=1",
+        verified: true
+      },
+      rating: 5,
+      date: "June 15, 2023",
+      content: "This medication has been a game-changer for me. After struggling with my condition for years, I finally found relief with minimal side effects. I highly recommend it to anyone in a similar situation.",
+      helpfulCount: 24,
+      condition: "Hypertension",
+      duration: "Over 1 year"
+    },
+    {
+      id: "2",
+      user: {
+        name: "Sarah M.",
+        avatar: "https://i.pravatar.cc/150?img=5",
+      },
+      rating: 4,
+      date: "May 3, 2023",
+      content: "Works well for pain relief, but I experienced some mild drowsiness as a side effect. It went away after a few days of use. Overall effective for what I needed.",
+      helpfulCount: 15,
+      condition: "Chronic Pain",
+      duration: "1-6 months"
+    },
+    {
+      id: "3",
+      user: {
+        name: "Robert K.",
+        avatar: "https://i.pravatar.cc/150?img=12",
+        verified: true
+      },
+      rating: 2,
+      date: "April 28, 2023",
+      content: "Unfortunately, I had a negative reaction to this medicine. It did help with the intended symptoms, but the side effects were too severe for me to continue taking it. I switched to an alternative.",
+      helpfulCount: 8,
+      condition: "Allergy",
+      duration: "Less than a week"
+    }
+  ];
   
   useEffect(() => {
+    setReviews(sampleReviews);
+    
     const fetchMedicine = async () => {
       try {
         setLoading(true);
@@ -59,6 +126,28 @@ const MedicineDetailsPage = () => {
                   .limit(3);
                   
                 setRelatedMedicines(relatedData || []);
+                
+                // Set some sample alternative medicines
+                setAlternativeMedicines([
+                  {
+                    id: "alt1",
+                    name: "Generic " + indexBasedMedicine.name,
+                    category: indexBasedMedicine.category,
+                    description: "Generic alternative with similar properties",
+                    isGeneric: true,
+                    similarity: "High",
+                    averagePrice: "60% less"
+                  },
+                  {
+                    id: "alt2",
+                    name: "Natural Alternative",
+                    category: "Natural Supplement",
+                    description: "Natural supplement with similar effects",
+                    isGeneric: false,
+                    similarity: "Medium",
+                    averagePrice: "Varies"
+                  }
+                ]);
               }
             } else {
               setMedicine({
@@ -90,6 +179,28 @@ const MedicineDetailsPage = () => {
                 .limit(3);
                 
               setRelatedMedicines(relatedData || []);
+              
+              // Set some sample alternative medicines
+              setAlternativeMedicines([
+                {
+                  id: "alt1",
+                  name: "Generic " + data.name,
+                  category: data.category,
+                  description: "Generic alternative with similar properties",
+                  isGeneric: true,
+                  similarity: "High",
+                  averagePrice: "60% less"
+                },
+                {
+                  id: "alt2",
+                  name: "Natural Alternative",
+                  category: "Natural Supplement",
+                  description: "Natural supplement with similar effects",
+                  isGeneric: false,
+                  similarity: "Medium",
+                  averagePrice: "Varies"
+                }
+              ]);
             }
           }
         } else {
@@ -113,6 +224,28 @@ const MedicineDetailsPage = () => {
                 .limit(3);
                 
               setRelatedMedicines(relatedData || []);
+              
+              // Set some sample alternative medicines
+              setAlternativeMedicines([
+                {
+                  id: "alt1",
+                  name: "Generic " + data.name,
+                  category: data.category,
+                  description: "Generic alternative with similar properties",
+                  isGeneric: true,
+                  similarity: "High",
+                  averagePrice: "60% less"
+                },
+                {
+                  id: "alt2",
+                  name: "Natural Alternative",
+                  category: "Natural Supplement",
+                  description: "Natural supplement with similar effects",
+                  isGeneric: false,
+                  similarity: "Medium",
+                  averagePrice: "Varies"
+                }
+              ]);
             }
           } else {
             setMedicine({
@@ -155,6 +288,18 @@ const MedicineDetailsPage = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
+  
+  // Filter reviews based on the active tab
+  const filteredReviews = activeReviewsTab === "all" 
+    ? reviews 
+    : activeReviewsTab === "positive" 
+      ? reviews.filter(review => review.rating >= 4) 
+      : reviews.filter(review => review.rating < 4);
+  
+  // Calculate average rating
+  const averageRating = reviews.length 
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
+    : 0;
 
   if (loading) {
     return (
@@ -271,6 +416,85 @@ const MedicineDetailsPage = () => {
               </Alert>
             </CardContent>
           </Card>
+          
+          {/* Alternative Medicines Section */}
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-4">Alternative Medicines</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {alternativeMedicines.map((alt) => (
+                <Card key={alt.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between">
+                      <div>
+                        <Badge variant={alt.isGeneric ? "default" : "outline"} className="mb-2">
+                          {alt.isGeneric ? "Generic Alternative" : alt.category}
+                        </Badge>
+                        <CardTitle className="text-lg">{alt.name}</CardTitle>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <p className="text-sm text-muted-foreground mb-3">{alt.description}</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs mb-2">
+                      <div className="bg-muted p-2 rounded-md">
+                        <p className="text-muted-foreground">Similarity</p>
+                        <p className="font-medium">{alt.similarity}</p>
+                      </div>
+                      <div className="bg-muted p-2 rounded-md">
+                        <p className="text-muted-foreground">Avg. Price</p>
+                        <p className="font-medium">{alt.averagePrice}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardHeader className="py-0 px-4 pb-4">
+                    <Button variant="outline" size="sm" className="w-full">
+                      View Details
+                    </Button>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          </div>
+          
+          {/* User Reviews Section */}
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">User Reviews & Ratings</h2>
+              <div className="flex items-center gap-1">
+                <span className="font-medium">{averageRating.toFixed(1)}</span>
+                <Star className="h-5 w-5 text-amber-400 fill-amber-400" />
+                <span className="text-sm text-muted-foreground ml-1">({reviews.length} reviews)</span>
+              </div>
+            </div>
+            
+            <Tabs 
+              value={activeReviewsTab} 
+              onValueChange={setActiveReviewsTab}
+              className="space-y-6"
+            >
+              <TabsList>
+                <TabsTrigger value="all">All Reviews</TabsTrigger>
+                <TabsTrigger value="positive">Positive</TabsTrigger>
+                <TabsTrigger value="negative">Critical</TabsTrigger>
+              </TabsList>
+              
+              <div className="space-y-4">
+                {filteredReviews.length > 0 ? (
+                  filteredReviews.map((review) => (
+                    <MedicineReview key={review.id} {...review} />
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No {activeReviewsTab === "all" ? "" : activeReviewsTab} reviews yet.</p>
+                  </div>
+                )}
+                
+                <div className="mt-8">
+                  <MedicineRatingForm />
+                </div>
+              </div>
+            </Tabs>
+          </div>
         </div>
         
         <div className="space-y-6">
@@ -293,7 +517,7 @@ const MedicineDetailsPage = () => {
           
           <Card>
             <CardHeader>
-              <CardTitle>Alternative Medications</CardTitle>
+              <CardTitle>Similar Medications</CardTitle>
               <CardDescription>
                 Other options in the same category
               </CardDescription>
@@ -319,9 +543,51 @@ const MedicineDetailsPage = () => {
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  No alternatives available at this time.
+                  No similar medications available at this time.
                 </p>
               )}
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Medicine Effectiveness</CardTitle>
+              <CardDescription>
+                Based on user reviews and clinical data
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Effectiveness Rating</span>
+                    <span className="font-medium">{averageRating.toFixed(1)}/5</span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary rounded-full" 
+                      style={{ width: `${(averageRating / 5) * 100}%` }}
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  <div className="bg-muted rounded-md p-3 text-center">
+                    <div className="flex justify-center mb-1">
+                      <ThumbsUp className="h-5 w-5 text-green-500" />
+                    </div>
+                    <p className="text-sm font-medium">80%</p>
+                    <p className="text-xs text-muted-foreground">Recommend</p>
+                  </div>
+                  <div className="bg-muted rounded-md p-3 text-center">
+                    <div className="flex justify-center mb-1">
+                      <ThumbsDown className="h-5 w-5 text-red-500" />
+                    </div>
+                    <p className="text-sm font-medium">20%</p>
+                    <p className="text-xs text-muted-foreground">Don't Recommend</p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
           
