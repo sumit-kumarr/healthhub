@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileHeader from "./layout/MobileHeader";
 import Sidebar from "./layout/Sidebar";
-import ProfileMenu from "./layout/ProfileMenu";
 import MobileSidebarControls from "./layout/MobileSidebarControls";
 
 const Layout = () => {
@@ -26,28 +25,15 @@ const Layout = () => {
       {/* Mobile header */}
       <MobileHeader onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
       
-      {/* Sidebar with fully rendered components inside */}
-      <Sidebar isSidebarOpen={isSidebarOpen} />
-      
-      {/* Handle closing sidebar on mobile with X button */}
-      {isSidebarOpen && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsSidebarOpen(false)} />
-          <div className="fixed inset-y-0 left-0 z-50 w-64 bg-sidebar">
-            <MobileSidebarControls onClose={() => setIsSidebarOpen(false)} />
-            <div className="p-6 border-b border-sidebar-border">
-              <span className="text-xl font-bold">HealthTech</span>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              {/* The sidebar navigation items are rendered in the Sidebar component */}
-            </div>
-            <ProfileMenu />
-          </div>
-        </>
-      )}
+      {/* Main sidebar component */}
+      <Sidebar 
+        isSidebarOpen={isSidebarOpen} 
+        onCloseMobile={() => setIsSidebarOpen(false)}
+        isMobile={isMobile}
+      />
       
       {/* Mobile sidebar backdrop */}
-      {isSidebarOpen && (
+      {isMobile && isSidebarOpen && (
         <Dialog open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
           <DialogContent className="hidden" />
         </Dialog>

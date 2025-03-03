@@ -9,9 +9,13 @@ import {
   Utensils,
   MessageSquare,
 } from "lucide-react";
+import ProfileMenu from "./ProfileMenu";
+import MobileSidebarControls from "./MobileSidebarControls";
 
 interface SidebarProps {
   isSidebarOpen: boolean;
+  onCloseMobile: () => void;
+  isMobile: boolean;
 }
 
 export const mainNavItems = [
@@ -24,18 +28,18 @@ export const mainNavItems = [
   { href: "/community", label: "Community", icon: <MessageSquare className="h-5 w-5" /> },
 ];
 
-const Sidebar = ({ isSidebarOpen }: SidebarProps) => {
-  const sidebarClasses = isSidebarOpen 
-    ? "fixed inset-y-0 left-0 transform translate-x-0 transition-transform duration-300 ease-in-out z-50"
+const Sidebar = ({ isSidebarOpen, onCloseMobile, isMobile }: SidebarProps) => {
+  // In mobile view, we need to display the sidebar using fixed positioning with a transform
+  // In desktop view, we need a static sidebar that's always visible
+  const sidebarClasses = isMobile
+    ? `fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out z-50`
     : "fixed inset-y-0 left-0 transform -translate-x-full transition-transform duration-300 ease-in-out z-50 md:translate-x-0";
   
   return (
     <aside className={sidebarClasses}>
       <div className="h-full w-64 bg-sidebar text-sidebar-foreground flex flex-col">
         {/* Close button - mobile only */}
-        <div className="md:hidden p-4 flex justify-end">
-          {/* This will be handled by parent component */}
-        </div>
+        {isMobile && <MobileSidebarControls onClose={onCloseMobile} />}
         
         {/* Brand */}
         <div className="p-6 border-b border-sidebar-border">
@@ -58,6 +62,7 @@ const Sidebar = ({ isSidebarOpen }: SidebarProps) => {
                         : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                     }`
                   }
+                  onClick={isMobile ? onCloseMobile : undefined}
                 >
                   {item.icon}
                   <span>{item.label}</span>
@@ -66,6 +71,9 @@ const Sidebar = ({ isSidebarOpen }: SidebarProps) => {
             ))}
           </ul>
         </nav>
+        
+        {/* Profile menu at bottom */}
+        <ProfileMenu />
       </div>
     </aside>
   );
