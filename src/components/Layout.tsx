@@ -1,12 +1,11 @@
 
 import { Outlet, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 import { Toaster } from "@/components/ui/toaster";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileHeader from "./layout/MobileHeader";
 import Sidebar from "./layout/Sidebar";
-import MobileSidebarControls from "./layout/MobileSidebarControls";
 
 const Layout = () => {
   const location = useLocation();
@@ -34,14 +33,15 @@ const Layout = () => {
       
       {/* Mobile sidebar backdrop */}
       {isMobile && isSidebarOpen && (
-        <Dialog open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-          <DialogContent className="hidden" />
-        </Dialog>
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" 
+          onClick={() => setIsSidebarOpen(false)}
+        />
       )}
       
       {/* Main content */}
-      <main className="flex-1 md:pl-64">
-        <div className="mx-auto">
+      <main className="flex-1 md:pl-64 pt-[60px] md:pt-0">
+        <div className="mx-auto w-full max-w-7xl p-4">
           <Outlet />
         </div>
       </main>

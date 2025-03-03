@@ -13,7 +13,7 @@ const MobileSidebarControls = ({ onClose }: MobileSidebarControlsProps) => {
         variant="ghost" 
         size="icon" 
         onClick={onClose}
-        className="text-sidebar-foreground"
+        className="text-sidebar-foreground hover:bg-sidebar-accent/50 rounded-full"
       >
         <X className="h-6 w-6" />
       </Button>
