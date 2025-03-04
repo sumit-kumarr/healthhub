@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Filter, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserPost } from "@/components/community/UserPost";
-import CreatePostForm from "@/components/community/CreatePostForm";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import CreatePostForm, { NewPostData } from "@/components/community/CreatePostForm";
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth";
 
@@ -14,7 +13,6 @@ export function CommunityFeed() {
   const { toast } = useToast();
   const { user } = useAuth();
   
-  // Sample posts data 
   const [posts, setPosts] = useState([
     {
       id: 1,
@@ -57,8 +55,7 @@ export function CommunityFeed() {
     }
   ]);
 
-  const handlePostCreated = (newPost) => {
-    // Add the new post to the top of the posts list
+  const handlePostCreated = (newPost: NewPostData) => {
     setPosts([
       {
         id: posts.length + 1,
@@ -141,6 +138,8 @@ export function CommunityFeed() {
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[550px] p-0">
+              <DialogTitle className="sr-only">Create New Post</DialogTitle>
+              <DialogDescription className="sr-only">Share your thoughts with the community</DialogDescription>
               <CreatePostForm onPostCreated={handlePostCreated} />
             </DialogContent>
           </Dialog>

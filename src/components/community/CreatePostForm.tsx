@@ -9,8 +9,15 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth";
 
+// Define a proper type for the post data
+export interface NewPostData {
+  content: string;
+  imageUrl?: string | null;
+  tags?: string[];
+}
+
 interface CreatePostFormProps {
-  onPostCreated: () => void;
+  onPostCreated: (newPost: NewPostData) => void;
 }
 
 const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
@@ -84,20 +91,22 @@ const CreatePostForm = ({ onPostCreated }: CreatePostFormProps) => {
       return;
     }
 
-    // Here we would normally submit to a database,
-    // but for now we'll just call the callback
-    toast({
-      title: "Post created successfully",
-      description: "Your post has been shared with the community",
-    });
+    // Create the new post object with properly typed data
+    const newPost: NewPostData = {
+      content: content.trim(),
+      imageUrl: imagePreview,
+      tags: tags.length > 0 ? tags : undefined
+    };
     
+    // Call the callback with the new post data
+    onPostCreated(newPost);
+    
+    // Reset the form
     setContent("");
     setTags([]);
     setTagInput("");
     setImage(null);
     setImagePreview(null);
-    
-    onPostCreated();
   };
 
   return (
