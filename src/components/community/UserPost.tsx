@@ -17,7 +17,7 @@ interface UserPostProps {
   user: {
     name: string;
     avatar: string;
-    badge?: string;
+    badge?: string; // Make badge optional
   };
   content: string;
   image?: string;

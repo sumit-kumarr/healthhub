@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Filter, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -62,9 +63,10 @@ export function CommunityFeed() {
         user: {
           name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Anonymous",
           avatar: user?.user_metadata?.avatar_url || "",
+          // Make the badge property optional in new posts
         },
         content: newPost.content,
-        image: newPost.imageUrl || null,
+        image: newPost.imageUrl || undefined,
         likes: 0,
         comments: 0,
         time: "Just now",
