@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, Pill, Filter, X, FileText, AlertCircle, Thermometer, Brain, Heart, Droplet, Dna } from "lucide-react";
+import { Search, Pill, Filter, X, FileText, AlertCircle, Thermometer, Brain, Heart, Droplet, Dna, Leaf, Flower, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,7 +34,18 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Enhanced Mock data for medicines (expanded with more Indian medicines)
+const MEDICINE_TYPES = [
+  "Allopathic",
+  "Ayurvedic",
+  "Homeopathic",
+  "Herbal",
+  "Unani",
+  "Siddha",
+  "Chinese",
+  "Naturopathic",
+  "Dietary Supplement"
+];
+
 const mockMedicines = [
   {
     id: 1,
@@ -129,6 +139,7 @@ const mockMedicines = [
     id: 9,
     name: "Ashwagandha",
     category: "Ayurvedic",
+    medicineType: "Ayurvedic",
     dosage: "300-500mg",
     condition: "Stress, Anxiety, Insomnia",
     description: "An ancient medicinal herb used in Ayurvedic medicine to boost brain function, lower blood sugar and cortisol levels, and help with anxiety and stress.",
@@ -140,6 +151,7 @@ const mockMedicines = [
     id: 10,
     name: "Turmeric (Curcumin)",
     category: "Ayurvedic",
+    medicineType: "Ayurvedic",
     dosage: "500-2000mg",
     condition: "Inflammation, Joint Pain",
     description: "A powerful anti-inflammatory and antioxidant spice used in traditional Indian medicine for thousands of years.",
@@ -151,6 +163,7 @@ const mockMedicines = [
     id: 11,
     name: "Triphala",
     category: "Ayurvedic",
+    medicineType: "Ayurvedic",
     dosage: "500-1000mg",
     condition: "Digestive Issues, Constipation",
     description: "A traditional Ayurvedic herbal formulation consisting of three fruits: Amalaki, Bibhitaki, and Haritaki. Used for digestion and detoxification.",
@@ -206,6 +219,7 @@ const mockMedicines = [
     id: 16,
     name: "Guduchi (Tinospora cordifolia)",
     category: "Ayurvedic",
+    medicineType: "Ayurvedic",
     dosage: "300-500mg",
     condition: "Immune Support, Fever",
     description: "Known as 'Amrita' in Ayurveda, this herb is used to boost immunity and treat fevers, particularly chronic fevers like dengue and chikungunya.",
@@ -217,6 +231,7 @@ const mockMedicines = [
     id: 17,
     name: "Neem (Azadirachta indica)",
     category: "Ayurvedic",
+    medicineType: "Ayurvedic",
     dosage: "300-500mg",
     condition: "Skin Conditions, Diabetes",
     description: "A versatile medicinal plant used in Ayurveda for skin disorders, diabetes management, dental care, and as an insect repellent.",
@@ -250,16 +265,136 @@ const mockMedicines = [
     id: 20,
     name: "Brahmi (Bacopa monnieri)",
     category: "Ayurvedic",
+    medicineType: "Ayurvedic",
     dosage: "300-500mg",
     condition: "Cognitive Enhancement, Anxiety",
     description: "A traditional Ayurvedic herb used to enhance memory, improve cognitive function, and reduce anxiety and stress.",
     instructions: "Take with food to avoid stomach upset. Benefits may take 8-12 weeks to manifest.",
     sideEffects: ["Digestive upset", "Dry mouth", "Fatigue"],
     contraindications: ["Slow heart rate", "Gastrointestinal blockage", "Pregnancy"]
+  },
+  {
+    id: 21,
+    name: "Arnica Montana",
+    category: "Homeopathic",
+    medicineType: "Homeopathic",
+    dosage: "30C potency",
+    condition: "Bruises, Muscle Soreness",
+    description: "A homeopathic remedy used for pain relief, bruising, and muscle soreness.",
+    instructions: "Take 3-5 pellets under the tongue, away from food and drink.",
+    sideEffects: ["Generally considered safe in homeopathic dilutions"],
+    contraindications: ["Open wounds (for topical application)"]
+  },
+  {
+    id: 22,
+    name: "Oscillo (Oscillococcinum)",
+    category: "Homeopathic",
+    medicineType: "Homeopathic",
+    dosage: "One dose",
+    condition: "Flu-like Symptoms",
+    description: "A popular homeopathic preparation used to reduce the duration and severity of flu-like symptoms.",
+    instructions: "Dissolve entire contents of one tube under the tongue every 6 hours.",
+    sideEffects: ["None reported"],
+    contraindications: ["None known"]
+  },
+  {
+    id: 23,
+    name: "Bryonia Alba",
+    category: "Homeopathic",
+    medicineType: "Homeopathic",
+    dosage: "30C potency",
+    condition: "Dry Cough, Joint Pain",
+    description: "Used in homeopathy for dry, painful coughs and joint pain that worsens with movement.",
+    instructions: "Take 3-5 pellets under tongue 3 times daily or as directed.",
+    sideEffects: ["None at homeopathic dilutions"],
+    contraindications: ["None known"]
+  },
+  {
+    id: 24,
+    name: "Echinacea",
+    category: "Herbal",
+    medicineType: "Herbal",
+    dosage: "300-500mg",
+    condition: "Immune Support, Cold Prevention",
+    description: "An herbal supplement used to boost the immune system and help prevent colds and respiratory infections.",
+    instructions: "Take at first sign of cold and continue for 7-10 days.",
+    sideEffects: ["Nausea", "Dizziness", "Allergic reactions in some individuals"],
+    contraindications: ["Autoimmune disorders", "Allergies to plants in the daisy family"]
+  },
+  {
+    id: 25,
+    name: "St. John's Wort",
+    category: "Herbal",
+    medicineType: "Herbal",
+    dosage: "300mg three times daily",
+    condition: "Mild to Moderate Depression",
+    description: "An herbal supplement used to treat mild to moderate depression, anxiety, and sleep disorders.",
+    instructions: "Take consistently for 4-6 weeks to see full benefits.",
+    sideEffects: ["Increased sun sensitivity", "Dry mouth", "Dizziness", "Digestive upset"],
+    contraindications: ["Many medication interactions", "Antidepressants", "Oral contraceptives"]
+  },
+  {
+    id: 26,
+    name: "Triphala Churna",
+    category: "Ayurvedic",
+    medicineType: "Ayurvedic",
+    dosage: "3-5g",
+    condition: "Digestive Health, Detoxification",
+    description: "A traditional Ayurvedic herbal formulation composed of three fruits, used for digestive health and gentle detoxification.",
+    instructions: "Mix with warm water and consume before bedtime.",
+    sideEffects: ["Increased bowel movements", "Mild abdominal discomfort initially"],
+    contraindications: ["Diarrhea", "Pregnancy"]
+  },
+  {
+    id: 27,
+    name: "Kali Phosphoricum",
+    category: "Homeopathic",
+    medicineType: "Homeopathic",
+    dosage: "6X potency",
+    condition: "Nervous Exhaustion, Mental Fatigue",
+    description: "A homeopathic cell salt used for nervous exhaustion, mental fatigue, and anxiety.",
+    instructions: "Dissolve 4 tablets under tongue 3-4 times daily.",
+    sideEffects: ["None at homeopathic dilutions"],
+    contraindications: ["None known"]
+  },
+  {
+    id: 28,
+    name: "Hawthorn Extract",
+    category: "Herbal",
+    medicineType: "Herbal",
+    dosage: "300-600mg",
+    condition: "Heart Health, Mild Hypertension",
+    description: "An herbal supplement used to support heart health, mild hypertension, and improved circulation.",
+    instructions: "Take daily with food. Effects may take 6-8 weeks to become noticeable.",
+    sideEffects: ["Nausea", "Digestive upset", "Fatigue", "Dizziness"],
+    contraindications: ["Heart medications", "Blood pressure medications"]
+  },
+  {
+    id: 29,
+    name: "Chyawanprash",
+    category: "Ayurvedic",
+    medicineType: "Ayurvedic",
+    dosage: "1-2 teaspoons",
+    condition: "Immune Support, General Wellness",
+    description: "A traditional Ayurvedic herbal jam containing amla (Indian gooseberry) and many other herbs, used for immune support and overall wellness.",
+    instructions: "Take 1-2 teaspoons daily, preferably in the morning.",
+    sideEffects: ["Generally safe", "May cause digestive upset in some individuals"],
+    contraindications: ["Diabetes (due to sugar content in some formulations)"]
+  },
+  {
+    id: 30,
+    name: "Ma Huang (Ephedra)",
+    category: "Chinese",
+    medicineType: "Chinese",
+    dosage: "As directed by practitioner",
+    condition: "Asthma, Congestion",
+    description: "A traditional Chinese herb used to treat asthma, congestion, and respiratory conditions.",
+    instructions: "Only use under supervision of qualified Traditional Chinese Medicine practitioner.",
+    sideEffects: ["Increased heart rate", "Insomnia", "Anxiety", "High blood pressure"],
+    contraindications: ["Heart conditions", "Hypertension", "Anxiety disorders", "Glaucoma"]
   }
 ];
 
-// Medicine categories
 const categories = [
   "Pain Reliever",
   "Antibiotic",
@@ -275,7 +410,6 @@ const categories = [
   "Electrolyte Replenishment"
 ];
 
-// Health conditions
 const conditions = [
   "Pain",
   "Fever",
@@ -308,7 +442,6 @@ const conditions = [
   "Cognitive Enhancement"
 ];
 
-// Categories with their icons for better visual representation
 const categoryIcons = {
   "Pain Reliever": <AlertCircle className="h-5 w-5" />,
   "Antibiotic": <Thermometer className="h-5 w-5" />,
@@ -318,24 +451,48 @@ const categoryIcons = {
   "Statin": <Heart className="h-5 w-5" />,
   "Proton Pump Inhibitor": <Droplet className="h-5 w-5" />,
   "Bronchodilator": <Droplet className="h-5 w-5" />,
-  "Ayurvedic": <Pill className="h-5 w-5" />,
+  "Ayurvedic": <Leaf className="h-5 w-5" />,
+  "Homeopathic": <Droplet className="h-5 w-5" />,
+  "Herbal": <Flower className="h-5 w-5" />,
+  "Chinese": <Pill className="h-5 w-5" />,
   "Antimalarial": <Thermometer className="h-5 w-5" />,
   "Anthelmintic": <Droplet className="h-5 w-5" />,
   "Electrolyte Replenishment": <Droplet className="h-5 w-5" />
+};
+
+const getMedicineTypeIcon = (medicineType: string) => {
+  switch (medicineType) {
+    case "Ayurvedic":
+      return <Leaf className="h-5 w-5" />;
+    case "Homeopathic":
+      return <Droplet className="h-5 w-5" />;
+    case "Herbal":
+      return <Flower className="h-5 w-5" />;
+    case "Allopathic":
+      return <Stethoscope className="h-5 w-5" />;
+    case "Chinese":
+      return <Pill className="h-5 w-5" />;
+    case "Unani":
+    case "Siddha":
+    case "Naturopathic":
+    case "Dietary Supplement":
+      return <Pill className="h-5 w-5" />;
+    default:
+      return <Pill className="h-5 w-5" />;
+  }
 };
 
 const MedicineSearchPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCondition, setSelectedCondition] = useState("");
+  const [selectedMedicineType, setSelectedMedicineType] = useState("");
   const [filteredMedicines, setFilteredMedicines] = useState(mockMedicines);
   const [activeTab, setActiveTab] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Simulated fetch of medications data with loading state
   useEffect(() => {
     setIsLoading(true);
-    // Simulate network delay
     const timer = setTimeout(() => {
       setFilteredMedicines(mockMedicines);
       setIsLoading(false);
@@ -347,11 +504,9 @@ const MedicineSearchPage = () => {
   const handleSearch = () => {
     setIsLoading(true);
     
-    // Simulate network delay
     setTimeout(() => {
       let results = mockMedicines;
       
-      // Filter by search term
       if (searchTerm) {
         results = results.filter(med => 
           med.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -360,21 +515,26 @@ const MedicineSearchPage = () => {
         );
       }
       
-      // Filter by category
       if (selectedCategory && selectedCategory !== "all-categories") {
         results = results.filter(med => med.category === selectedCategory);
       }
       
-      // Filter by condition
       if (selectedCondition && selectedCondition !== "all-conditions") {
         results = results.filter(med => med.condition.includes(selectedCondition));
       }
       
-      // Filter by tab
+      if (selectedMedicineType && selectedMedicineType !== "all-types") {
+        results = results.filter(med => med.medicineType === selectedMedicineType);
+      }
+      
       if (activeTab === "ayurvedic") {
-        results = results.filter(med => med.category === "Ayurvedic");
+        results = results.filter(med => med.medicineType === "Ayurvedic");
       } else if (activeTab === "allopathic") {
-        results = results.filter(med => med.category !== "Ayurvedic");
+        results = results.filter(med => med.medicineType === "Allopathic");
+      } else if (activeTab === "homeopathic") {
+        results = results.filter(med => med.medicineType === "Homeopathic");
+      } else if (activeTab === "herbal") {
+        results = results.filter(med => med.medicineType === "Herbal");
       }
       
       setFilteredMedicines(results);
@@ -386,6 +546,7 @@ const MedicineSearchPage = () => {
     setSearchTerm("");
     setSelectedCategory("");
     setSelectedCondition("");
+    setSelectedMedicineType("");
     setActiveTab("all");
     setFilteredMedicines(mockMedicines);
   };
@@ -395,7 +556,6 @@ const MedicineSearchPage = () => {
     
     let results = mockMedicines;
     
-    // Apply existing filters
     if (searchTerm) {
       results = results.filter(med => 
         med.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -412,11 +572,18 @@ const MedicineSearchPage = () => {
       results = results.filter(med => med.condition.includes(selectedCondition));
     }
     
-    // Apply tab filter
+    if (selectedMedicineType && selectedMedicineType !== "all-types") {
+      results = results.filter(med => med.medicineType === selectedMedicineType);
+    }
+    
     if (value === "ayurvedic") {
-      results = results.filter(med => med.category === "Ayurvedic");
+      results = results.filter(med => med.medicineType === "Ayurvedic");
     } else if (value === "allopathic") {
-      results = results.filter(med => med.category !== "Ayurvedic");
+      results = results.filter(med => med.medicineType === "Allopathic");
+    } else if (value === "homeopathic") {
+      results = results.filter(med => med.medicineType === "Homeopathic");
+    } else if (value === "herbal") {
+      results = results.filter(med => med.medicineType === "Herbal");
     }
     
     setFilteredMedicines(results);
@@ -426,15 +593,17 @@ const MedicineSearchPage = () => {
     <div className="container mx-auto px-4 py-12">
       <SectionHeader
         title="Medicine Database"
-        description="Search for medicines by name, category, or health condition"
+        description="Search for medicines by name, category, or health condition across Homeopathic, Ayurvedic, Allopathic, Herbal and more traditional systems"
         align="left"
       />
       
       <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
-        <TabsList className="mb-6">
+        <TabsList className="mb-6 flex flex-wrap">
           <TabsTrigger value="all">All Medicines</TabsTrigger>
           <TabsTrigger value="allopathic">Allopathic</TabsTrigger>
           <TabsTrigger value="ayurvedic">Ayurvedic</TabsTrigger>
+          <TabsTrigger value="homeopathic">Homeopathic</TabsTrigger>
+          <TabsTrigger value="herbal">Herbal</TabsTrigger>
         </TabsList>
       </Tabs>
       
@@ -443,7 +612,7 @@ const MedicineSearchPage = () => {
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search for a medicine..."
+              placeholder="Search for your medicine (Homeopathic, Ayurvedic, Allopathic, Herbal, and more...)"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -454,7 +623,6 @@ const MedicineSearchPage = () => {
         <div className="flex gap-2">
           <Button onClick={handleSearch}>Search</Button>
           
-          {/* Mobile filter button */}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" className="md:hidden">
@@ -470,6 +638,23 @@ const MedicineSearchPage = () => {
                 </SheetDescription>
               </SheetHeader>
               <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Medicine Type</h3>
+                  <Select value={selectedMedicineType} onValueChange={setSelectedMedicineType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a medicine type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all-types">All Types</SelectItem>
+                      {MEDICINE_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Category</h3>
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -519,8 +704,21 @@ const MedicineSearchPage = () => {
         </div>
       </div>
       
-      {/* Desktop filters */}
       <div className="hidden md:flex gap-4 mb-8">
+        <Select value={selectedMedicineType} onValueChange={setSelectedMedicineType}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by medicine type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all-types">All Medicine Types</SelectItem>
+            {MEDICINE_TYPES.map((type) => (
+              <SelectItem key={type} value={type}>
+                {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Filter by category" />
@@ -550,10 +748,8 @@ const MedicineSearchPage = () => {
         </Select>
       </div>
       
-      {/* Results */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
-          // Loading skeletons
           Array(6).fill(0).map((_, index) => (
             <Card key={index} className="h-full flex flex-col">
               <CardHeader>
@@ -595,15 +791,25 @@ const MedicineSearchPage = () => {
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="text-xl">{medicine.name}</CardTitle>
-                    <div className="flex items-center gap-1 mt-1">
+                    <div className="flex flex-wrap items-center gap-1 mt-1">
                       <Badge variant="outline" className="flex items-center gap-1">
                         {categoryIcons[medicine.category as keyof typeof categoryIcons] || <Pill className="h-3.5 w-3.5" />}
                         <span>{medicine.category}</span>
                       </Badge>
+                      
+                      {medicine.medicineType && (
+                        <Badge variant="secondary" className="flex items-center gap-1 ml-1">
+                          {getMedicineTypeIcon(medicine.medicineType)}
+                          <span>{medicine.medicineType}</span>
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   <div className="bg-primary/10 p-2 rounded-full">
-                    <Pill className="h-5 w-5 text-primary" />
+                    {medicine.medicineType ? 
+                      getMedicineTypeIcon(medicine.medicineType) : 
+                      <Pill className="h-5 w-5 text-primary" />
+                    }
                   </div>
                 </div>
               </CardHeader>
@@ -642,26 +848,32 @@ const MedicineSearchPage = () => {
         )}
       </div>
       
-      {/* FAQ Section */}
       <div className="mt-16">
         <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1">
             <AccordionTrigger>How is this medicine database organized?</AccordionTrigger>
             <AccordionContent>
-              Our medicine database categorizes medications by their type (e.g., pain reliever, antibiotic) and the health conditions they treat. You can search by name, filter by category, or look up medicines for specific health conditions. We include both allopathic and traditional Ayurvedic medicines.
+              Our medicine database categorizes medications by their type (e.g., Allopathic, Ayurvedic, Homeopathic, Herbal) and the health conditions they treat. You can search by name, filter by category, or look up medicines for specific health conditions across different medical systems.
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="item-2">
-            <AccordionTrigger>Is this information a substitute for medical advice?</AccordionTrigger>
+            <AccordionTrigger>What's the difference between various medicine types?</AccordionTrigger>
             <AccordionContent>
-              No, the information provided in our medicine database is for educational purposes only. Always consult with a healthcare professional before starting, stopping, or changing any medication regimen.
+              <ul className="list-disc pl-5 space-y-2">
+                <li><strong>Allopathic:</strong> Conventional Western medicine that uses drugs, surgery, or radiation to treat symptoms and diseases.</li>
+                <li><strong>Ayurvedic:</strong> Traditional Indian medicine focused on balancing body systems through herbs, lifestyle changes, and practices.</li>
+                <li><strong>Homeopathic:</strong> Treatment using highly diluted substances that cause symptoms similar to the illness, based on "like cures like" principle.</li>
+                <li><strong>Herbal:</strong> Plant-based remedies used to prevent and treat various health conditions.</li>
+                <li><strong>Unani:</strong> Traditional medicine from ancient Greece, developed in the Muslim world, using natural remedies to restore body balance.</li>
+                <li><strong>Chinese:</strong> Traditional medicine from China using herbs, acupuncture, and other methods to balance the body's energy flow.</li>
+              </ul>
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="item-3">
-            <AccordionTrigger>How often is the medicine database updated?</AccordionTrigger>
+            <AccordionTrigger>Is this information a substitute for medical advice?</AccordionTrigger>
             <AccordionContent>
-              Our database is regularly updated to include new medications and the latest information about existing ones. We work with healthcare professionals to ensure accuracy and relevance.
+              No, the information provided in our medicine database is for educational purposes only. Always consult with a healthcare professional before starting, stopping, or changing any medication regimen, especially when combining different medical systems.
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="item-4">

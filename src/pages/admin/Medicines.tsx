@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Edit, Trash2, ArrowUpDown, MoreHorizontal, Pill } from "lucide-react";
+import { Plus, Search, Edit, Trash2, ArrowUpDown, MoreHorizontal, Pill, Leaf, Flower, Stethoscope, Droplet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -48,6 +48,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 // Type definition for medicine data
 interface Medicine {
@@ -55,6 +56,7 @@ interface Medicine {
   name: string;
   description: string;
   category: string;
+  medicine_type?: string;
   usage: string;
   side_effects: string;
   dosage: string;
@@ -75,11 +77,41 @@ const CATEGORIES = [
   "Other"
 ];
 
+// Medicine types
+const MEDICINE_TYPES = [
+  "Allopathic",
+  "Ayurvedic",
+  "Homeopathic",
+  "Herbal",
+  "Unani",
+  "Siddha",
+  "Chinese",
+  "Naturopathic",
+  "Dietary Supplement"
+];
+
+// Get icon for medicine type
+const getMedicineTypeIcon = (medicineType: string) => {
+  switch (medicineType) {
+    case "Ayurvedic":
+      return <Leaf className="h-4 w-4" />;
+    case "Homeopathic":
+      return <Droplet className="h-4 w-4" />;
+    case "Herbal":
+      return <Flower className="h-4 w-4" />;
+    case "Allopathic":
+      return <Stethoscope className="h-4 w-4" />;
+    default:
+      return <Pill className="h-4 w-4" />;
+  }
+};
+
 // Form validation schema
 const medicineFormSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   category: z.string().min(1, "Please select a category"),
+  medicine_type: z.string().min(1, "Please select a medicine type"),
   usage: z.string().min(10, "Usage instructions must be at least 10 characters"),
   side_effects: z.string().min(5, "Side effects must be at least 5 characters"),
   dosage: z.string().min(5, "Dosage must be at least 5 characters"),
@@ -93,6 +125,7 @@ const AdminMedicinesPage = () => {
   const [currentMedicine, setCurrentMedicine] = useState<Medicine | null>(null);
   const [sortBy, setSortBy] = useState<keyof Medicine>("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [selectedMedicineType, setSelectedMedicineType] = useState<string>("");
   const { toast } = useToast();
   
   const form = useForm<z.infer<typeof medicineFormSchema>>({
@@ -101,6 +134,7 @@ const AdminMedicinesPage = () => {
       name: "",
       description: "",
       category: "",
+      medicine_type: "",
       usage: "",
       side_effects: "",
       dosage: "",
@@ -145,11 +179,17 @@ const AdminMedicinesPage = () => {
     }
   };
   
-  const filteredMedicines = medicines.filter(medicine => 
-    medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    medicine.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    medicine.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredMedicines = medicines
+    .filter(medicine => 
+      medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      medicine.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      medicine.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (medicine.medicine_type && medicine.medicine_type.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+    .filter(medicine => 
+      !selectedMedicineType || 
+      medicine.medicine_type === selectedMedicineType
+    );
   
   const handleEditMedicine = (medicine: Medicine) => {
     setCurrentMedicine(medicine);
@@ -157,6 +197,7 @@ const AdminMedicinesPage = () => {
       name: medicine.name,
       description: medicine.description,
       category: medicine.category,
+      medicine_type: medicine.medicine_type || "",
       usage: medicine.usage,
       side_effects: medicine.side_effects,
       dosage: medicine.dosage,
@@ -256,6 +297,7 @@ const AdminMedicinesPage = () => {
       name: "",
       description: "",
       category: "",
+      medicine_type: "",
       usage: "",
       side_effects: "",
       dosage: "",
@@ -267,7 +309,7 @@ const AdminMedicinesPage = () => {
     <div className="container px-4 py-8">
       <SectionHeader
         title="Manage Medicines"
-        description="Add, edit, or remove medicines from the database"
+        description="Add, edit, or remove medicines from the database across various medicine types"
         align="left"
       />
       
@@ -281,9 +323,24 @@ const AdminMedicinesPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button onClick={handleAddNew} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Add Medicine
-        </Button>
+        
+        <div className="flex flex-wrap gap-2">
+          <Select value={selectedMedicineType} onValueChange={setSelectedMedicineType}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="All medicine types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All medicine types</SelectItem>
+              {MEDICINE_TYPES.map(type => (
+                <SelectItem key={type} value={type}>{type}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Button onClick={handleAddNew} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Add Medicine
+          </Button>
+        </div>
       </div>
       
       <div className="rounded-md border">
@@ -301,6 +358,7 @@ const AdminMedicinesPage = () => {
                   )}
                 </div>
               </TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="hidden md:table-cell">Description</TableHead>
               <TableHead 
@@ -320,13 +378,13 @@ const AdminMedicinesPage = () => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={6} className="text-center py-8">
                   Loading medicines...
                 </TableCell>
               </TableRow>
             ) : filteredMedicines.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={6} className="text-center py-8">
                   No medicines found. {searchQuery ? "Try a different search." : "Add your first medicine."}
                 </TableCell>
               </TableRow>
@@ -334,6 +392,14 @@ const AdminMedicinesPage = () => {
               filteredMedicines.map((medicine) => (
                 <TableRow key={medicine.id}>
                   <TableCell className="font-medium">{medicine.name}</TableCell>
+                  <TableCell>
+                    {medicine.medicine_type && (
+                      <Badge variant="outline" className="flex items-center gap-1 w-fit">
+                        {getMedicineTypeIcon(medicine.medicine_type)}
+                        {medicine.medicine_type}
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell>{medicine.category}</TableCell>
                   <TableCell className="hidden md:table-cell max-w-xs truncate">
                     {medicine.description}
@@ -400,6 +466,34 @@ const AdminMedicinesPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
+                  name="medicine_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Medicine Type</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select medicine type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {MEDICINE_TYPES.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
                   name="category"
                   render={({ field }) => (
                     <FormItem>
@@ -425,7 +519,9 @@ const AdminMedicinesPage = () => {
                     </FormItem>
                   )}
                 />
-                
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
                   name="dosage"
