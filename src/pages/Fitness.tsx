@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Dumbbell, 
@@ -231,7 +230,7 @@ const FitnessPage = () => {
             "Gradually increase your pace to a comfortable jog",
             "Keep your posture upright with a slight forward lean",
             "Land midfoot, not on your heels or toes",
-            "Breathe rhythmically, inhaling for 2-3 steps and exhaling for 2-3 steps",
+            "Breathe rhythmically, inhale for 2-3 steps and exhale for 2-3 steps",
             "Cool down with a 5-minute walk at the end"
           ],
           variations: [
@@ -443,7 +442,7 @@ const FitnessPage = () => {
           variations: [
             {
               name: "Free Weights",
-              description: "Using dumbbells, barbells, or kettlebells for resistance with unrestricted movement patterns."
+              description: "Using dumbbells, barbells or kettlebells for resistance with unrestricted movement patterns."
             },
             {
               name: "Machine Weights",
@@ -1080,7 +1079,10 @@ const FitnessPage = () => {
                                   className="flex gap-4 p-3 border rounded-lg cursor-pointer hover:border-primary/50"
                                   onClick={() => {
                                     handleWorkoutClick(workout);
-                                    document.querySelector('[data-state="open"] button[data-radix-collection-item]')?.click();
+                                    const dialogCloseButton = document.querySelector('[data-state="open"] button[data-radix-collection-item]');
+                                    if (dialogCloseButton && dialogCloseButton instanceof HTMLElement) {
+                                      dialogCloseButton.click();
+                                    }
                                   }}
                                 >
                                   <img 
