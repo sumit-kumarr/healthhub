@@ -24,13 +24,19 @@ import { UserPost } from "@/components/community/UserPost";
 import { ExpertSession } from "@/components/community/ExpertSession";
 import { FitnessGroup } from "@/components/community/FitnessGroup";
 import { Separator } from "@/components/ui/separator";
+import CreatePostForm from "@/components/community/CreatePostForm";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 const CommunityPage = () => {
   const [activeTab, setActiveTab] = useState("feed");
+  const [showCreatePost, setShowCreatePost] = useState(false);
+  const { toast } = useToast();
   
   // Sample posts data 
-  const posts = [
+  const [posts, setPosts] = useState([
     {
+      id: 1,
       user: {
         name: "Sarah Johnson",
         avatar: "https://images.unsplash.com/photo-1557296387-5358ad7997bb?auto=format&fit=crop&w=150&q=80",
@@ -44,6 +50,7 @@ const CommunityPage = () => {
       tags: ["running", "cardio", "morningworkout"]
     },
     {
+      id: 2,
       user: {
         name: "Michael Chen",
         avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
@@ -55,6 +62,7 @@ const CommunityPage = () => {
       tags: ["mediterraneandiet", "nutrition", "healthyeating"]
     },
     {
+      id: 3,
       user: {
         name: "Emma Wilson",
         avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80",
@@ -66,7 +74,7 @@ const CommunityPage = () => {
       time: "Yesterday",
       tags: ["sleep", "wellness", "healthhabits"]
     }
-  ];
+  ]);
 
   // Sample expert sessions data
   const expertSessions = [
@@ -162,6 +170,54 @@ const CommunityPage = () => {
     }
   ];
 
+  const handlePostCreated = () => {
+    // In a real app, we would fetch the updated posts from the database
+    // For now, we'll just close the create post form and refresh the UI
+    setShowCreatePost(false);
+    toast({
+      title: "Post published!",
+      description: "Your post is now visible to the community",
+    });
+  };
+
+  const handlePostShare = (postId: number) => {
+    toast({
+      title: "Post shared",
+      description: "Post has been shared successfully",
+    });
+  };
+
+  const handlePostLike = (postId: number) => {
+    setPosts(posts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          likes: post.likes + 1
+        };
+      }
+      return post;
+    }));
+  };
+
+  const handlePostComment = (postId: number, comment: string) => {
+    if (!comment.trim()) return;
+    
+    setPosts(posts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          comments: post.comments + 1
+        };
+      }
+      return post;
+    }));
+    
+    toast({
+      title: "Comment added",
+      description: "Your comment has been added to the post",
+    });
+  };
+
   return (
     <div className="container px-4 py-8">
       <SectionHeader
@@ -182,10 +238,17 @@ const CommunityPage = () => {
             </div>
             
             <div className="flex gap-2">
-              <Button className="gap-2 flex-1 md:flex-none">
-                <Plus className="h-4 w-4" />
-                New Post
-              </Button>
+              <Dialog open={showCreatePost} onOpenChange={setShowCreatePost}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2 flex-1 md:flex-none">
+                    <Plus className="h-4 w-4" />
+                    New Post
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[550px] p-0">
+                  <CreatePostForm onPostCreated={handlePostCreated} />
+                </DialogContent>
+              </Dialog>
               
               <Button variant="outline" className="gap-2 md:hidden">
                 <Filter className="h-4 w-4" />
@@ -206,8 +269,16 @@ const CommunityPage = () => {
             </TabsList>
             
             <TabsContent value="feed" className="space-y-4 animate-fade-in">
+              <CreatePostForm onPostCreated={handlePostCreated} />
+              
               {posts.map((post, i) => (
-                <UserPost key={i} {...post} />
+                <UserPost 
+                  key={i} 
+                  {...post} 
+                  onLike={() => handlePostLike(post.id)}
+                  onComment={(comment) => handlePostComment(post.id, comment)}
+                  onShare={() => handlePostShare(post.id)}
+                />
               ))}
               
               <Button variant="outline" className="w-full">

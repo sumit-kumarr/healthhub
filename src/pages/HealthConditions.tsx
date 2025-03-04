@@ -12,7 +12,8 @@ import {
   Bone,
   Pill,
   Dumbbell,
-  Microscope // Replacing Lungs with Microscope which is available in lucide-react
+  Microscope,
+  ClipboardCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import HealthAssessment from "@/components/HealthAssessment";
+import AssessmentResult from "@/components/AssessmentResult";
 
 interface ConditionCardProps {
   title: string;
@@ -146,6 +149,10 @@ const MedicineItem = ({ name, dosage, usage, sideEffects }: MedicineItemProps) =
 const HealthConditionsPage = () => {
   const [selectedCondition, setSelectedCondition] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAssessment, setShowAssessment] = useState(false);
+  const [assessmentCompleted, setAssessmentCompleted] = useState(false);
+  const [assessmentScore, setAssessmentScore] = useState(0);
+  const [assessmentMaxScore, setAssessmentMaxScore] = useState(0);
   
   const conditions = [
     {
@@ -262,7 +269,7 @@ const HealthConditionsPage = () => {
     {
       title: "Asthma Control",
       description: "Managing asthma symptoms and triggers",
-      icon: <Microscope className="h-4 w-4" />, // Changed from Lungs to Microscope
+      icon: <Microscope className="h-4 w-4" />,
       category: "Respiratory",
       longDescription: "Asthma is a condition in which your airways narrow and swell and may produce extra mucus. This can make breathing difficult and trigger coughing, a whistling sound (wheezing) when you breathe out and shortness of breath. For some people, asthma is a minor nuisance. For others, it can be a major problem that interferes with daily activities and may lead to a life-threatening asthma attack.",
       tips: [
@@ -505,7 +512,6 @@ const HealthConditionsPage = () => {
     }
   ];
 
-  // Fetch medicines from Supabase
   const { data: medicinesData, isLoading: medicinesLoading } = useQuery({
     queryKey: ['medicines'],
     queryFn: async () => {
@@ -520,7 +526,17 @@ const HealthConditionsPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Filter conditions based on search term
+  const handleAssessmentComplete = (score: number, maxScore: number) => {
+    setAssessmentScore(score);
+    setAssessmentMaxScore(maxScore);
+    setAssessmentCompleted(true);
+  };
+
+  const resetAssessment = () => {
+    setAssessmentCompleted(false);
+    setShowAssessment(false);
+  };
+
   const filteredConditions = conditions.filter(condition => 
     condition.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     condition.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -535,7 +551,27 @@ const HealthConditionsPage = () => {
         align="left"
       />
       
-      {selectedCondition ? (
+      {showAssessment ? (
+        <div className="animate-fade-in py-6">
+          <Button
+            variant="ghost"
+            className="mb-6"
+            onClick={resetAssessment}
+          >
+            ← Back to health conditions
+          </Button>
+          
+          {assessmentCompleted ? (
+            <AssessmentResult 
+              score={assessmentScore} 
+              maxScore={assessmentMaxScore} 
+              onReset={resetAssessment} 
+            />
+          ) : (
+            <HealthAssessment onComplete={handleAssessmentComplete} />
+          )}
+        </div>
+      ) : selectedCondition ? (
         <div className="grid gap-8 lg:grid-cols-3 animate-fade-in">
           <div className="lg:col-span-2">
             <Button
@@ -744,7 +780,7 @@ const HealthConditionsPage = () => {
               </CardDescription>
             </CardHeader>
             <CardFooter>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowAssessment(true)}>
                 Start Assessment <ArrowRight className="h-4 w-4" />
               </Button>
             </CardFooter>
