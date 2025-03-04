@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { z } from "zod";
 import { MailCheck, Lock, Mail, UserPlus, LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";

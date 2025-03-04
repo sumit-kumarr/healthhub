@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileHeader from "./layout/MobileHeader";
 import Sidebar from "./layout/Sidebar";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
 
 const Layout = () => {

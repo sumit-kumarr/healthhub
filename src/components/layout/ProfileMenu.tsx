@@ -4,7 +4,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { User, Settings, LogOut, Search, LayoutDashboard, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,

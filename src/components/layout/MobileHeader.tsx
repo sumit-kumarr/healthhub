@@ -1,9 +1,8 @@
-
 import { Link } from "react-router-dom";
 import { Menu, Search, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 
 interface MobileHeaderProps {
   onMenuToggle: () => void;
@@ -13,11 +12,8 @@ const MobileHeader = ({ onMenuToggle }: MobileHeaderProps) => {
   const [unreadNotifications, setUnreadNotifications] = useState(3);
   const { user } = useAuth();
   
-  // Simulate getting unread notifications
   useEffect(() => {
-    // This would typically be a real API call or subscription to get notifications
     if (user) {
-      // For demo purposes, this is hardcoded
       setUnreadNotifications(3);
     } else {
       setUnreadNotifications(0);
