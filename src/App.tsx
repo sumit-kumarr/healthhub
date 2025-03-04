@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +16,7 @@ import CommunityPage from "./pages/Community";
 import ProfilePage from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
+import AdminLoginPage from "./pages/auth/AdminLogin";
 import ResetPasswordPage from "./pages/ResetPassword";
 import MedicineSearchPage from "./pages/MedicineSearch";
 import MedicineDetailsPage from "./pages/MedicineDetails";
@@ -45,13 +47,13 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
   // Here we would check if the user has admin role
-  // For now, we'll just check if they're authenticated
+  // For now, we'll just check if they're authenticated and have the admin email
   if (loading) {
     return <div className="flex h-screen items-center justify-center">Loading...</div>;
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   if (user.email !== "admin@example.com") {
@@ -72,6 +74,7 @@ const App = () => (
             <Routes>
               {/* Public routes */}
               <Route path="/auth" element={<AuthPage />} />
+              <Route path="/admin/login" element={<AdminLoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               
               {/* Protected routes */}
