@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Textarea } from "@/components/ui/textarea";
 
 interface UserPostProps {
   user: {
@@ -24,6 +25,9 @@ interface UserPostProps {
   comments: number;
   time: string;
   tags?: string[];
+  onLike?: () => void;
+  onComment?: (comment: string) => void;
+  onShare?: () => void;
 }
 
 export function UserPost({ 
@@ -33,10 +37,15 @@ export function UserPost({
   likes, 
   comments, 
   time,
-  tags = []
+  tags = [],
+  onLike,
+  onComment,
+  onShare
 }: UserPostProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
+  const [showCommentInput, setShowCommentInput] = useState(false);
+  const [commentText, setCommentText] = useState('');
   
   const handleLike = () => {
     if (liked) {
@@ -45,6 +54,29 @@ export function UserPost({
       setLikeCount(likeCount + 1);
     }
     setLiked(!liked);
+    
+    if (onLike) {
+      onLike();
+    }
+  };
+  
+  const handleComment = () => {
+    if (!showCommentInput) {
+      setShowCommentInput(true);
+      return;
+    }
+    
+    if (commentText.trim() && onComment) {
+      onComment(commentText);
+      setCommentText('');
+      setShowCommentInput(false);
+    }
+  };
+  
+  const handleShare = () => {
+    if (onShare) {
+      onShare();
+    }
   };
   
   return (
@@ -110,24 +142,56 @@ export function UserPost({
         </div>
       )}
       
-      <CardFooter className="flex justify-between p-4 pt-2 border-t">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className={`gap-1 ${liked ? 'text-red-500' : ''}`}
-          onClick={handleLike}
-        >
-          <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
-          <span>{likeCount}</span>
-        </Button>
-        <Button variant="ghost" size="sm" className="gap-1">
-          <MessageCircle className="h-4 w-4" />
-          <span>{comments}</span>
-        </Button>
-        <Button variant="ghost" size="sm" className="gap-1">
-          <Share2 className="h-4 w-4" />
-          <span>Share</span>
-        </Button>
+      <CardFooter className="flex flex-col p-4 pt-2 border-t gap-4">
+        <div className="flex justify-between w-full">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`gap-1 ${liked ? 'text-red-500' : ''}`}
+            onClick={handleLike}
+          >
+            <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
+            <span>{likeCount}</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="gap-1"
+            onClick={handleComment}
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span>{comments}</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="gap-1"
+            onClick={handleShare}
+          >
+            <Share2 className="h-4 w-4" />
+            <span>Share</span>
+          </Button>
+        </div>
+        
+        {showCommentInput && (
+          <div className="w-full space-y-2">
+            <Textarea 
+              placeholder="Write a comment..." 
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              className="min-h-[60px]"
+            />
+            <div className="flex justify-end">
+              <Button 
+                size="sm" 
+                onClick={handleComment}
+                disabled={!commentText.trim()}
+              >
+                Post Comment
+              </Button>
+            </div>
+          </div>
+        )}
       </CardFooter>
     </Card>
   );
