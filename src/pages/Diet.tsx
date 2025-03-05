@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Search, Plus, Info, ArrowRight, ThumbsUp, Heart, Droplets } from "lucide-react";
+import { Search, Plus, Info, ArrowRight, ThumbsUp, Heart, Droplets, Clock, Flame, UtensilsCrossed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -14,6 +13,7 @@ import WaterTracker from "@/components/diet/WaterTracker";
 import NutritionChart from "@/components/diet/NutritionChart";
 import DietTypesGrid from "@/components/diet/DietTypesGrid";
 import DietPlansGrid from "@/components/diet/DietPlansGrid";
+import RecipeCard from "@/components/diet/RecipeCard";
 
 const meals = [
   {
@@ -110,6 +110,214 @@ const fruits = [
     image: "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=800&q=80",
     benefits: "Rich in vitamin E, magnesium, and healthy fats. May help lower cholesterol and blood pressure.",
     calories: 164
+  },
+  {
+    name: "Kiwi",
+    category: "Fruit",
+    image: "https://images.unsplash.com/photo-1618897996318-5a901fa6ca71?auto=format&fit=crop&w=800&q=80",
+    benefits: "High in vitamin C, fiber, and potassium. Supports immune system and digestive health.",
+    calories: 61
+  },
+  {
+    name: "Mango",
+    category: "Fruit",
+    image: "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=800&q=80",
+    benefits: "Rich in vitamins A and C. Contains enzymes that aid digestion and boost immunity.",
+    calories: 99
+  },
+  {
+    name: "Broccoli",
+    category: "Vegetable",
+    image: "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=800&q=80",
+    benefits: "Packed with vitamins K and C, folate, and fiber. Supports bone health and may reduce cancer risk.",
+    calories: 55
+  },
+  {
+    name: "Sweet Potato",
+    category: "Vegetable",
+    image: "https://images.unsplash.com/photo-1596097564327-48988a61357d?auto=format&fit=crop&w=800&q=80",
+    benefits: "High in beta-carotene, vitamins A and C. Supports eye health and immune function.",
+    calories: 86
+  }
+];
+
+const recipes = [
+  {
+    id: "1",
+    title: "Mediterranean Salad",
+    description: "A refreshing salad with cucumbers, tomatoes, olives, and feta cheese.",
+    image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80",
+    prepTime: "15 min",
+    cookTime: "0 min",
+    calories: 320,
+    servings: 2,
+    difficulty: "Easy",
+    tags: ["Vegetarian", "Low-Carb", "Mediterranean"],
+    ingredients: [
+      "2 cups mixed greens",
+      "1 cucumber, sliced",
+      "1 cup cherry tomatoes, halved",
+      "1/2 red onion, thinly sliced",
+      "1/2 cup kalamata olives",
+      "4 oz feta cheese, crumbled",
+      "2 tbsp extra virgin olive oil",
+      "1 tbsp lemon juice",
+      "1 tsp dried oregano",
+      "Salt and pepper to taste"
+    ],
+    instructions: [
+      "Combine greens, cucumber, tomatoes, onion, and olives in a large bowl.",
+      "Whisk together olive oil, lemon juice, oregano, salt, and pepper.",
+      "Drizzle dressing over salad and toss gently to coat.",
+      "Top with crumbled feta cheese and serve immediately."
+    ]
+  },
+  {
+    id: "2",
+    title: "Avocado Toast with Poached Egg",
+    description: "A nutritious breakfast combining healthy fats and protein.",
+    image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80",
+    prepTime: "5 min",
+    cookTime: "5 min",
+    calories: 350,
+    servings: 1,
+    difficulty: "Easy",
+    tags: ["Breakfast", "High-Protein", "Vegetarian"],
+    ingredients: [
+      "1 slice whole grain bread",
+      "1/2 ripe avocado",
+      "1 large egg",
+      "1 tsp vinegar",
+      "Salt and pepper to taste",
+      "Red pepper flakes (optional)",
+      "Fresh herbs (optional)"
+    ],
+    instructions: [
+      "Toast the bread until golden brown.",
+      "Mash the avocado and spread on toast. Season with salt and pepper.",
+      "Bring a pot of water to a gentle simmer. Add vinegar.",
+      "Crack egg into a small bowl, then gently slip into the simmering water.",
+      "Cook for 3-4 minutes for a runny yolk.",
+      "Remove egg with a slotted spoon and place on top of avocado toast.",
+      "Garnish with red pepper flakes or fresh herbs if desired."
+    ]
+  },
+  {
+    id: "3",
+    title: "Berry Protein Smoothie",
+    description: "A quick and nutritious smoothie packed with antioxidants and protein.",
+    image: "https://images.unsplash.com/photo-1553530666-ba11a90a0c3b?auto=format&fit=crop&w=800&q=80",
+    prepTime: "5 min",
+    cookTime: "0 min",
+    calories: 280,
+    servings: 1,
+    difficulty: "Easy",
+    tags: ["Breakfast", "Snack", "High-Protein"],
+    ingredients: [
+      "1 cup mixed berries (strawberries, blueberries, raspberries)",
+      "1 scoop protein powder",
+      "1 cup almond milk (or milk of choice)",
+      "1 tbsp almond butter",
+      "1/2 banana (optional for sweetness)",
+      "Ice cubes"
+    ],
+    instructions: [
+      "Add all ingredients to a blender.",
+      "Blend until smooth and creamy.",
+      "Pour into a glass and serve immediately."
+    ]
+  },
+  {
+    id: "4",
+    title: "Grilled Salmon with Asparagus",
+    description: "A protein-rich dinner with healthy omega-3 fatty acids.",
+    image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=800&q=80",
+    prepTime: "10 min",
+    cookTime: "15 min",
+    calories: 420,
+    servings: 2,
+    difficulty: "Medium",
+    tags: ["Dinner", "High-Protein", "Low-Carb"],
+    ingredients: [
+      "2 salmon fillets (6 oz each)",
+      "1 bunch asparagus, trimmed",
+      "2 tbsp olive oil",
+      "2 cloves garlic, minced",
+      "1 lemon, half juiced and half sliced",
+      "2 tsp fresh dill, chopped",
+      "Salt and pepper to taste"
+    ],
+    instructions: [
+      "Preheat grill or oven to 400°F (200°C).",
+      "Place salmon and asparagus on a sheet pan or grill basket.",
+      "Drizzle with olive oil and sprinkle with garlic, salt, and pepper.",
+      "Add lemon slices on top of salmon.",
+      "Grill or bake for 12-15 minutes until salmon is cooked through.",
+      "Drizzle with lemon juice and sprinkle with fresh dill before serving."
+    ]
+  },
+  {
+    id: "5",
+    title: "Quinoa Bowl with Roasted Vegetables",
+    description: "A nutrient-dense vegetarian meal with complete protein.",
+    image: "https://images.unsplash.com/photo-1556040220-4096d522e6dc?auto=format&fit=crop&w=800&q=80",
+    prepTime: "15 min",
+    cookTime: "25 min",
+    calories: 390,
+    servings: 2,
+    difficulty: "Medium",
+    tags: ["Lunch", "Dinner", "Vegetarian"],
+    ingredients: [
+      "1 cup quinoa, rinsed",
+      "2 cups vegetable broth",
+      "1 sweet potato, diced",
+      "1 red bell pepper, sliced",
+      "1 zucchini, sliced",
+      "1 red onion, sliced",
+      "2 tbsp olive oil",
+      "2 tsp cumin",
+      "1 tsp paprika",
+      "Salt and pepper to taste",
+      "1/4 cup tahini",
+      "2 tbsp lemon juice",
+      "1 clove garlic, minced",
+      "Water to thin sauce"
+    ],
+    instructions: [
+      "Preheat oven to 425°F (220°C).",
+      "Cook quinoa in vegetable broth according to package instructions.",
+      "Toss vegetables with olive oil, cumin, paprika, salt, and pepper.",
+      "Spread on a baking sheet and roast for 20-25 minutes, stirring halfway.",
+      "Mix tahini, lemon juice, garlic, and enough water to make a pourable sauce.",
+      "Serve quinoa topped with roasted vegetables and drizzle with tahini sauce."
+    ]
+  },
+  {
+    id: "6",
+    title: "Greek Yogurt Parfait",
+    description: "A protein-packed breakfast or snack with layers of flavor and texture.",
+    image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80",
+    prepTime: "10 min",
+    cookTime: "0 min",
+    calories: 290,
+    servings: 1,
+    difficulty: "Easy",
+    tags: ["Breakfast", "Snack", "High-Protein"],
+    ingredients: [
+      "1 cup Greek yogurt",
+      "1/4 cup granola",
+      "1/4 cup mixed berries",
+      "1 tbsp honey or maple syrup",
+      "1 tbsp chia seeds",
+      "1 tbsp sliced almonds"
+    ],
+    instructions: [
+      "Layer half of the yogurt in a glass or jar.",
+      "Add a layer of granola and berries.",
+      "Add remaining yogurt on top.",
+      "Top with more berries, granola, chia seeds, and almonds.",
+      "Drizzle with honey or maple syrup."
+    ]
   }
 ];
 
@@ -261,10 +469,28 @@ const DietPage = () => {
             </TabsContent>
             
             <TabsContent value="recipes" className="animate-fade-in">
-              <div className="text-center py-10">
-                <h3 className="text-lg font-medium mb-2">Recipe Collection Coming Soon</h3>
-                <p className="text-muted-foreground mb-6">We're working on a delicious collection of healthy recipes.</p>
-                <Button variant="outline">Notify Me When Available</Button>
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-medium text-lg">Healthy Recipes</h3>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      Filter
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Sort
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="grid gap-6 md:grid-cols-2">
+                  {recipes.map((recipe) => (
+                    <RecipeCard key={recipe.id} recipe={recipe} />
+                  ))}
+                </div>
+                
+                <Button className="w-full">
+                  View All Recipes <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             </TabsContent>
           </Tabs>
