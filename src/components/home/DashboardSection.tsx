@@ -1,10 +1,97 @@
+
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Activity, Brain, Dumbbell, Heart, Pill, Salad, Search, User, ShieldCheck } from "lucide-react";
+import { Activity, Brain, Dumbbell, Heart, Pill, Salad, Search, User, ShieldCheck, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/stat-card";
 
 export function DashboardSection({ user }: { user: any }) {
+  const [activityStats, setActivityStats] = useState({
+    steps: 6240,
+    trend: "up",
+    trendValue: "12% from yesterday"
+  });
+  
+  const [heartRate, setHeartRate] = useState({
+    value: 72,
+    trend: "neutral",
+    trendValue: "Stable"
+  });
+  
+  const [workouts, setWorkouts] = useState({
+    value: 3,
+    trend: "up",
+    trendValue: "1 more than last week"
+  });
+  
+  const [mindfulness, setMindfulness] = useState({
+    value: 15,
+    trend: "down",
+    trendValue: "5min less than goal"
+  });
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Simulate real-time data updates
+  useEffect(() => {
+    const updateIntervalId = setInterval(() => {
+      // Randomly update step count to simulate real-time changes
+      const stepChange = Math.floor(Math.random() * 20) - 5; // -5 to +15 steps
+      setActivityStats(prev => ({
+        ...prev,
+        steps: Math.max(0, prev.steps + stepChange)
+      }));
+      
+      // Occasionally update heart rate
+      if (Math.random() > 0.7) {
+        const heartRateChange = Math.floor(Math.random() * 3) - 1; // -1 to +1 bpm
+        setHeartRate(prev => ({
+          ...prev,
+          value: prev.value + heartRateChange,
+          trendValue: heartRateChange > 0 ? "Slightly elevated" : heartRateChange < 0 ? "Slightly decreased" : "Stable",
+          trend: heartRateChange > 0 ? "up" : heartRateChange < 0 ? "down" : "neutral"
+        }));
+      }
+    }, 5000); // Update every 5 seconds
+    
+    return () => clearInterval(updateIntervalId);
+  }, []);
+  
+  const refreshData = () => {
+    setIsRefreshing(true);
+    
+    // Simulate data refresh
+    setTimeout(() => {
+      // Update all stats with new "simulated" data
+      setActivityStats({
+        steps: Math.floor(6000 + Math.random() * 1000),
+        trend: Math.random() > 0.5 ? "up" : "down",
+        trendValue: `${Math.floor(Math.random() * 15)}% from yesterday`
+      });
+      
+      setHeartRate({
+        value: Math.floor(70 + Math.random() * 5),
+        trend: Math.random() > 0.6 ? "neutral" : Math.random() > 0.5 ? "up" : "down",
+        trendValue: Math.random() > 0.6 ? "Stable" : "Slightly fluctuating"
+      });
+      
+      setWorkouts({
+        value: Math.floor(2 + Math.random() * 3),
+        trend: "up",
+        trendValue: `${Math.floor(Math.random() * 2) + 1} more than last week`
+      });
+      
+      setMindfulness({
+        value: Math.floor(10 + Math.random() * 10),
+        trend: Math.random() > 0.5 ? "up" : "down",
+        trendValue: `${Math.floor(Math.random() * 10)}min ${Math.random() > 0.5 ? "more than" : "less than"} goal`
+      });
+      
+      setIsRefreshing(false);
+    }, 1000);
+  };
+
   if (!user) {
     return null;
   }
@@ -12,11 +99,23 @@ export function DashboardSection({ user }: { user: any }) {
   return (
     <section className="bg-gradient-to-b from-primary/5 to-background py-12 px-4">
       <div className="container mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Welcome back, {user.email?.split('@')[0]}</h1>
-          <p className="text-muted-foreground mt-2">
-            Your personal health dashboard
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Welcome back, {user.email?.split('@')[0]}</h1>
+            <p className="text-muted-foreground mt-2">
+              Your personal health dashboard
+            </p>
+          </div>
+          <Button 
+            onClick={refreshData} 
+            variant="outline" 
+            size="sm"
+            className="gap-2"
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} /> 
+            {isRefreshing ? 'Updating...' : 'Refresh'}
+          </Button>
         </div>
 
         {/* Quick Actions */}
@@ -87,34 +186,36 @@ export function DashboardSection({ user }: { user: any }) {
           <StatCard
             icon={Activity}
             title="Today's Activity"
-            value="6,240"
+            value={activityStats.steps.toString()}
             description="Steps taken"
-            trend="up"
-            trendValue="12% from yesterday"
+            trend={activityStats.trend}
+            trendValue={activityStats.trendValue}
+            className="animate-pulse-subtle"
           />
           <StatCard
             icon={Heart}
             title="Heart Health"
-            value="72"
+            value={heartRate.value.toString()}
             description="Resting heart rate (bpm)"
-            trend="neutral"
-            trendValue="Stable"
+            trend={heartRate.trend}
+            trendValue={heartRate.trendValue}
+            className="animate-pulse-subtle"
           />
           <StatCard
             icon={Dumbbell}
             title="Workouts"
-            value="3"
+            value={workouts.value.toString()}
             description="Sessions this week"
-            trend="up"
-            trendValue="1 more than last week"
+            trend={workouts.trend}
+            trendValue={workouts.trendValue}
           />
           <StatCard
             icon={Brain}
             title="Mindfulness"
-            value="15"
+            value={mindfulness.value.toString()}
             description="Minutes today"
-            trend="down"
-            trendValue="5min less than goal"
+            trend={mindfulness.trend}
+            trendValue={mindfulness.trendValue}
           />
         </div>
 
