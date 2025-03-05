@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,10 +24,10 @@ import AdminMedicinesPage from "./pages/admin/Medicines";
 import AdminUsersPage from "./pages/admin/Users";
 import NotificationsPage from "./pages/Notifications";
 import HealthAssessmentPage from "./pages/HealthAssessment";
+import GymPage from "./pages/Gym";
 
 const queryClient = new QueryClient();
 
-// Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
@@ -46,8 +45,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
-  // Here we would check if the user has admin role
-  // For now, we'll just check if they're authenticated and have the admin email
   if (loading) {
     return <div className="flex h-screen items-center justify-center">Loading...</div>;
   }
@@ -72,12 +69,10 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Public routes */}
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/admin/login" element={<AdminLoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               
-              {/* Protected routes */}
               <Route 
                 path="/" 
                 element={<Layout />}>
@@ -87,6 +82,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <FitnessPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/gym" 
+                  element={
+                    <ProtectedRoute>
+                      <GymPage />
                     </ProtectedRoute>
                   } 
                 />
@@ -163,7 +166,6 @@ const App = () => (
                   } 
                 />
                 
-                {/* Admin routes */}
                 <Route 
                   path="/admin" 
                   element={
@@ -189,7 +191,6 @@ const App = () => (
                   } 
                 />
                 
-                {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>

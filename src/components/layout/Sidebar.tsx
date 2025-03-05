@@ -8,6 +8,7 @@ import {
   Pill,
   Utensils,
   MessageSquare,
+  Dumbbell,
 } from "lucide-react";
 import ProfileMenu from "./ProfileMenu";
 import MobileSidebarControls from "./MobileSidebarControls";
@@ -24,6 +25,7 @@ export const mainNavItems = [
   { href: "/medicines", label: "Medicines", icon: <Pill className="h-5 w-5" /> },
   { href: "/mental-health", label: "Mental Health", icon: <Brain className="h-5 w-5" /> },
   { href: "/fitness", label: "Fitness", icon: <BarChart2 className="h-5 w-5" /> },
+  { href: "/gym", label: "Gym", icon: <Dumbbell className="h-5 w-5" /> },
   { href: "/diet", label: "Diet & Nutrition", icon: <Utensils className="h-5 w-5" /> },
   { href: "/community", label: "Community", icon: <MessageSquare className="h-5 w-5" /> },
 ];
