@@ -6,11 +6,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dumbbell, Calendar, ChevronRight, Activity, Utensils, LineChart, Users } from "lucide-react";
+import { Dumbbell, Calendar, ChevronRight, Activity, Utensils, LineChart, Users, Search, BookOpen } from "lucide-react";
 import WorkoutPlans from "@/components/gym/WorkoutPlans";
 import NutritionPlans from "@/components/gym/NutritionPlans";
 import ProgressTracking from "@/components/gym/ProgressTracking";
 import GymLog from "@/components/gym/GymLog";
+import ExerciseLibrary from "@/components/gym/ExerciseLibrary";
+import NutritionGuide from "@/components/gym/NutritionGuide";
 import { useToast } from "@/hooks/use-toast";
 
 const GymPage = () => {
@@ -168,7 +170,7 @@ const GymPage = () => {
       </Card>
 
       <Tabs defaultValue="workouts" className="mb-8">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-8">
+        <TabsList className="grid grid-cols-2 md:grid-cols-6 mb-8">
           <TabsTrigger value="workouts" className="flex items-center gap-2">
             <Dumbbell className="h-4 w-4" />
             <span>Workouts</span>
@@ -184,6 +186,14 @@ const GymPage = () => {
           <TabsTrigger value="schedule" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             <span>Schedule</span>
+          </TabsTrigger>
+          <TabsTrigger value="exercises" className="flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            <span>Exercises</span>
+          </TabsTrigger>
+          <TabsTrigger value="nutrition-guide" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            <span>Nutrition Guide</span>
           </TabsTrigger>
         </TabsList>
         
@@ -201,6 +211,14 @@ const GymPage = () => {
         
         <TabsContent value="schedule" id="gym-log">
           <GymLog />
+        </TabsContent>
+
+        <TabsContent value="exercises" id="exercise-library">
+          <ExerciseLibrary />
+        </TabsContent>
+
+        <TabsContent value="nutrition-guide" id="nutrition-guide">
+          <NutritionGuide />
         </TabsContent>
       </Tabs>
     </div>
