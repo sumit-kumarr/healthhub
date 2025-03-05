@@ -1,10 +1,12 @@
+
 import { useState, useEffect } from "react";
-import { Search, Plus, Info } from "lucide-react";
+import { Search, Plus, Info, ArrowRight, ThumbsUp, Heart, Droplets } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SectionHeader } from "@/components/ui/section-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import MealItem from "@/components/diet/MealItem";
 import FoodCard from "@/components/diet/FoodCard";

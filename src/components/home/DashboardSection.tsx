@@ -9,25 +9,25 @@ import { StatCard } from "@/components/ui/stat-card";
 export function DashboardSection({ user }: { user: any }) {
   const [activityStats, setActivityStats] = useState({
     steps: 6240,
-    trend: "up",
+    trend: "up" as "up" | "down" | "neutral",
     trendValue: "12% from yesterday"
   });
   
   const [heartRate, setHeartRate] = useState({
     value: 72,
-    trend: "neutral",
+    trend: "neutral" as "up" | "down" | "neutral",
     trendValue: "Stable"
   });
   
   const [workouts, setWorkouts] = useState({
     value: 3,
-    trend: "up",
+    trend: "up" as "up" | "down" | "neutral",
     trendValue: "1 more than last week"
   });
   
   const [mindfulness, setMindfulness] = useState({
     value: 15,
-    trend: "down",
+    trend: "down" as "up" | "down" | "neutral",
     trendValue: "5min less than goal"
   });
 
@@ -66,25 +66,25 @@ export function DashboardSection({ user }: { user: any }) {
       // Update all stats with new "simulated" data
       setActivityStats({
         steps: Math.floor(6000 + Math.random() * 1000),
-        trend: Math.random() > 0.5 ? "up" : "down",
+        trend: Math.random() > 0.5 ? "up" : "down" as "up" | "down" | "neutral",
         trendValue: `${Math.floor(Math.random() * 15)}% from yesterday`
       });
       
       setHeartRate({
         value: Math.floor(70 + Math.random() * 5),
-        trend: Math.random() > 0.6 ? "neutral" : Math.random() > 0.5 ? "up" : "down",
+        trend: Math.random() > 0.6 ? "neutral" : Math.random() > 0.5 ? "up" : "down" as "up" | "down" | "neutral",
         trendValue: Math.random() > 0.6 ? "Stable" : "Slightly fluctuating"
       });
       
       setWorkouts({
         value: Math.floor(2 + Math.random() * 3),
-        trend: "up",
+        trend: "up" as "up" | "down" | "neutral",
         trendValue: `${Math.floor(Math.random() * 2) + 1} more than last week`
       });
       
       setMindfulness({
         value: Math.floor(10 + Math.random() * 10),
-        trend: Math.random() > 0.5 ? "up" : "down",
+        trend: Math.random() > 0.5 ? "up" : "down" as "up" | "down" | "neutral",
         trendValue: `${Math.floor(Math.random() * 10)}min ${Math.random() > 0.5 ? "more than" : "less than"} goal`
       });
       
